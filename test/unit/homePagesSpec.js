@@ -4,7 +4,7 @@ describe('Home Pages', function() {
 
   it('should test the homePages controller', inject(function($controller, $rootScope) {
     var ctrl = $controller('HomeCtrl', {
-      $scope : $rootScope
+      $scope: $rootScope
     });
     expect($rootScope.welcome_message.length).to.be.above(0);
   }));

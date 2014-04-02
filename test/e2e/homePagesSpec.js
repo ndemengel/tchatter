@@ -8,12 +8,11 @@ chai.use(chaiAsPromised);
 
 var expect = chai.expect;
 
-describe('Home Pages', function () {
+describe('Home Pages', function() {
 
-  it('should load the homepage', function () {
+  it('should load the homepage', function() {
     ptor.get('/#');
-
-    expect(element(by.id('view-container')).getText()).to.eventually.equal('Welcome Home...');
+    expect(element(by.id('view-container')).getText()).to.eventually.equal('Welcome to Tchatter...');
   });
 
 });

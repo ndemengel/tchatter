@@ -1,3 +1,17 @@
+process.on('SIGINT', function() {
+  try {
+    console.log('Shutting down server...');
+    var exec = require('child_process').exec;
+    exec('grunt shell:stop', function() {
+      process.exit();
+    });
+  }
+  catch (e) {
+    console.log(e);
+    process.exit();
+  }
+});
+
 module.exports = function(grunt) {
 
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
@@ -19,12 +33,18 @@ module.exports = function(grunt) {
       },
       npm_install: {
         command: 'npm install'
+      },
+      start: {
+        command: 'npm start'
+      },
+      stop: {
+        command: 'npm stop'
       }
     },
 
     connect: {
       options: {
-        base: 'app/'
+        base: 'public/app/'
       },
       webserver: {
         options: {
@@ -58,12 +78,12 @@ module.exports = function(grunt) {
       },
       singlerun: {},
       auto: {
-        keepAlive: true,
-        options: {
-          args: {
-            seleniumPort: 4444
-          }
-        }
+        keepAlive: true
+        //        options: {
+        //          args: {
+        //            seleniumPort: 4444
+        //          }
+        //        }
       }
     },
 
@@ -73,15 +93,15 @@ module.exports = function(grunt) {
       },
       all: [
         'Gruntfile.js',
-        'app/scripts/{,*/}*.js'
+        'public/app/scripts/{,*/}*.js'
       ]
     },
 
     concat: {
       styles: {
-        dest: './app/assets/app.css',
+        dest: './public/app/assets/app.css',
         src: [
-          'app/styles/app.css'
+          'public/app/styles/app.css'
           //place your Stylesheet files here
         ]
       },
@@ -89,28 +109,28 @@ module.exports = function(grunt) {
         options: {
           separator: ';'
         },
-        dest: './app/assets/app.js',
+        dest: './public/app/assets/app.js',
         src: [
           'bower_components/angular/angular.js',
           'bower_components/angular-route/angular-route.js',
           'bower_components/angular-animate/angular-animate.js',
-          'app/scripts/homePages.js',
-          'app/scripts/app.js'
+          'public/app/scripts/homePages.js',
+          'public/app/scripts/app.js'
           //place your JavaScript files here
         ]
       }
     },
 
     watch: {
-      options : {
+      options: {
         livereload: 7777
       },
       assets: {
-        files: ['app/styles/**/*.css','app/scripts/**/*.js'],
+        files: ['public/app/styles/**/*.css', 'public/app/scripts/**/*.js'],
         tasks: ['concat']
       },
       protractor: {
-        files: ['app/scripts/**/*.js','test/e2e/**/*.js'],
+        files: ['lib/**/*.js', 'public/app/scripts/**/*.js', 'test/e2e/**/*.js'],
         tasks: ['protractor:auto']
       }
     },
@@ -141,32 +161,32 @@ module.exports = function(grunt) {
         singleRun: true,
         reporters: ['progress', 'coverage'],
         preprocessors: {
-          'app/scripts/*.js': ['coverage']
+          'public/app/scripts/*.js': ['coverage']
         },
         coverageReporter: {
-          type : 'html',
-          dir : 'coverage/'
+          type: 'html',
+          dir: 'coverage/'
         }
       }
     }
   });
 
   //single run tests
-  grunt.registerTask('test', ['jshint','test:unit', 'test:e2e']);
+  grunt.registerTask('test', ['jshint', 'test:unit', 'test:e2e']);
   grunt.registerTask('test:unit', ['karma:unit']);
-  grunt.registerTask('test:e2e', ['connect:testserver','protractor:singlerun']);
+  grunt.registerTask('test:e2e', ['connect:testserver', 'protractor:singlerun']);
 
   //autotest and watch tests
   grunt.registerTask('autotest', ['karma:unit_auto']);
   grunt.registerTask('autotest:unit', ['karma:unit_auto']);
-  grunt.registerTask('autotest:e2e', ['connect:testserver','shell:selenium','watch:protractor']);
+  grunt.registerTask('autotest:e2e', ['shell:start', 'watch:protractor', 'shell:stop']);
 
   //coverage testing
   grunt.registerTask('test:coverage', ['karma:unit_coverage']);
-  grunt.registerTask('coverage', ['karma:unit_coverage','open:coverage','connect:coverage']);
+  grunt.registerTask('coverage', ['karma:unit_coverage', 'open:coverage', 'connect:coverage']);
 
   //installation-related
-  grunt.registerTask('install', ['update','shell:protractor_install']);
+  grunt.registerTask('install', ['update', 'shell:protractor_install']);
   grunt.registerTask('update', ['shell:npm_install', 'concat']);
 
   //defaults

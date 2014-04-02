@@ -2,7 +2,7 @@ angular.module('app.homePages', [])
 
   .factory('welcomeMessage', function() {
     return function() {
-      return 'Welcome Home...';
+      return 'Welcome to Tchatter...';
     };
   })
 
