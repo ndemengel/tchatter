@@ -1,4 +1,4 @@
-angular.module('app.homePages', [])
+angular.module('app.chat', [])
 
   .factory('welcomeMessage', function() {
     return function() {
@@ -6,6 +6,6 @@ angular.module('app.homePages', [])
     };
   })
 
-  .controller('HomeCtrl', function($scope, welcomeMessage) {
+  .controller('ChatCtrl', function($scope, welcomeMessage) {
     $scope.welcome_message = welcomeMessage();
   });

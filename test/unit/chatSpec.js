@@ -1,9 +1,9 @@
-describe('Home Pages', function() {
+describe('Chat Module', function() {
 
-  beforeEach(module('app.homePages'));
+  beforeEach(module('app.chat'));
 
   it('should test the homePages controller', inject(function($controller, $rootScope) {
-    var ctrl = $controller('HomeCtrl', {
+    var ctrl = $controller('ChatCtrl', {
       $scope: $rootScope
     });
     expect($rootScope.welcome_message.length).to.be.above(0);

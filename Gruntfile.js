@@ -114,8 +114,7 @@ module.exports = function(grunt) {
           'bower_components/angular/angular.js',
           'bower_components/angular-route/angular-route.js',
           'bower_components/angular-animate/angular-animate.js',
-          'public/app/scripts/homePages.js',
-          'public/app/scripts/app.js'
+          'public/app/scripts/**/*.js'
           //place your JavaScript files here
         ]
       }
@@ -179,7 +178,7 @@ module.exports = function(grunt) {
   //autotest and watch tests
   grunt.registerTask('autotest', ['karma:unit_auto']);
   grunt.registerTask('autotest:unit', ['karma:unit_auto']);
-  grunt.registerTask('autotest:e2e', ['shell:start', 'watch:protractor', 'shell:stop']);
+  grunt.registerTask('autotest:e2e', ['shell:start', 'watch', 'shell:stop']);
 
   //coverage testing
   grunt.registerTask('test:coverage', ['karma:unit_coverage']);

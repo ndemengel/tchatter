@@ -8,9 +8,9 @@ chai.use(chaiAsPromised);
 
 var expect = chai.expect;
 
-describe('Home Pages', function() {
+describe('Chat Page', function() {
 
-  it('should load the homepage', function() {
+  it('should welcome the user', function() {
     ptor.get('/#');
     expect(element(by.id('view-container')).getText()).to.eventually.equal('Welcome to Tchatter...');
   });
