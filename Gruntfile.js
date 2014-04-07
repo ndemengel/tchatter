@@ -2,7 +2,7 @@ process.on('SIGINT', function() {
   try {
     console.log('Shutting down server...');
     var exec = require('child_process').exec;
-    exec('grunt shell:stop', function() {
+    exec('npm stop', function() {
       process.exit();
     });
   }
@@ -46,17 +46,6 @@ module.exports = function(grunt) {
       options: {
         base: 'public/app/'
       },
-      webserver: {
-        options: {
-          port: 8888,
-          keepalive: true
-        }
-      },
-      devserver: {
-        options: {
-          port: 8888
-        }
-      },
       testserver: {
         options: {
           port: 9999
@@ -68,6 +57,15 @@ module.exports = function(grunt) {
           port: 5555,
           keepalive: true
         }
+      }
+    },
+
+    mochaTest: {
+      unit: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/server/**/*.js']
       }
     },
 
@@ -121,25 +119,26 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      options: {
-        livereload: 7777
-      },
       assets: {
+        options: {
+          livereload: 7777
+        },
         files: ['public/app/styles/**/*.css', 'public/app/scripts/**/*.js'],
         tasks: ['concat']
       },
       protractor: {
-        files: ['lib/**/*.js', 'public/app/scripts/**/*.js', 'test/e2e/**/*.js'],
+        files: ['app.js', 'lib/**/*.js', 'public/app/**/*', 'test/e2e/**/*.js'],
         tasks: ['protractor:auto']
+      },
+      mocha: {
+        files: ['app.js', 'lib/**/*.js', 'test/server/**/*.js'],
+        tasks: ['mochaTest:unit']
       }
     },
 
     open: {
-      devserver: {
-        path: 'http://localhost:8888'
-      },
-      coverage: {
-        path: 'http://localhost:5555'
+      app: {
+        path: 'http://localhost:9999'
       }
     },
 
@@ -171,14 +170,18 @@ module.exports = function(grunt) {
   });
 
   //single run tests
-  grunt.registerTask('test', ['jshint', 'test:unit', 'test:e2e']);
-  grunt.registerTask('test:unit', ['karma:unit']);
-  grunt.registerTask('test:e2e', ['connect:testserver', 'protractor:singlerun']);
+  grunt.registerTask('test', ['jshint', 'test:server', 'test:client', 'test:e2e']);
+  grunt.registerTask('test:client', ['karma:unit']);
+  grunt.registerTask('test:server', ['mochaTest:unit']);
+  grunt.registerTask('test:e2e', ['shell:start', 'protractor:singlerun', 'shell:stop']);
 
   //autotest and watch tests
-  grunt.registerTask('autotest', ['karma:unit_auto']);
-  grunt.registerTask('autotest:unit', ['karma:unit_auto']);
-  grunt.registerTask('autotest:e2e', ['shell:start', 'watch', 'shell:stop']);
+  // TODO install grunt-concurrent to defint autotest
+  grunt.registerTask('autotest', ['autotest:server', 'autotest:client', 'autotest:e2e']);
+  grunt.registerTask('autotest:client', ['karma:unit_auto']);
+  grunt.registerTask('autotest:server', ['watch:mocha']);
+  // TODO install grunt-concurrent to only run some targets of "watch" concurrently
+  grunt.registerTask('autotest:e2e', ['shell:start', 'watch']);
 
   //coverage testing
   grunt.registerTask('test:coverage', ['karma:unit_coverage']);
@@ -192,9 +195,5 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['dev']);
 
   //development
-  grunt.registerTask('dev', ['update', 'connect:devserver', 'open:devserver', 'watch:assets']);
-
-  //server daemon
-  grunt.registerTask('serve', ['connect:webserver']);
-
+  grunt.registerTask('dev', ['update', 'shell:start', 'watch:assets', 'open:app']);
 };

@@ -5,7 +5,7 @@ module.exports = function(config) {
       'bower_components/angular-route/angular-route.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'public/app/scripts/**/*.js',
-      'test/unit/**/*.js'
+      'test/client/**/*.js'
     ],
     basePath: '../',
     frameworks: ['chai', 'chai-as-promised', 'mocha', 'sinon', 'sinon-chai'],

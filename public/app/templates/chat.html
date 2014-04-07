@@ -1,1 +1,8 @@
-{{ welcome_message }}
+<p id="instructions">{{ welcome_message }}</p>
+<div id="message-history">
+ <p ng-repeat="msg in userMessages">{{ msg.msg }}</p>
+</div>
+<form ng-submit="submitMessage()">
+<label for="message-input">Type your message:</label><input id="message-input" ng-model="userMessage">
+<button type="submit">Send</button>
+</form>

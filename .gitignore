@@ -1,8 +1,12 @@
 .DS_Store
 .agignore
 .idea
+.project
+.settings
+app.log
 node_modules
+npm-debug.log
 bower_components
 /selenium
 /coverage
-/app/assets
+/public/app/assets
