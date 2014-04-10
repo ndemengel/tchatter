@@ -3,9 +3,8 @@
 .idea
 .project
 .settings
-app.log
+*.log
 node_modules
-npm-debug.log
 bower_components
 /selenium
 /coverage

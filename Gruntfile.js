@@ -173,7 +173,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['jshint', 'test:server', 'test:client', 'test:e2e']);
   grunt.registerTask('test:client', ['karma:unit']);
   grunt.registerTask('test:server', ['mochaTest:unit']);
-  grunt.registerTask('test:e2e', ['shell:start', 'protractor:singlerun', 'shell:stop']);
+  grunt.registerTask('test:e2e', ['protractor:singlerun']);
 
   //autotest and watch tests
   // TODO install grunt-concurrent to defint autotest
@@ -181,7 +181,7 @@ module.exports = function(grunt) {
   grunt.registerTask('autotest:client', ['karma:unit_auto']);
   grunt.registerTask('autotest:server', ['watch:mocha']);
   // TODO install grunt-concurrent to only run some targets of "watch" concurrently
-  grunt.registerTask('autotest:e2e', ['shell:start', 'watch']);
+  grunt.registerTask('autotest:e2e', ['watch']);
 
   //coverage testing
   grunt.registerTask('test:coverage', ['karma:unit_coverage']);
