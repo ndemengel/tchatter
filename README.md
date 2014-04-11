@@ -1,6 +1,6 @@
 # Tchatter
 
-A simple chat application to play with Node, Angular and al.
+A simple chat application to gather many buzzwords and play with Node/Express, Angular, SockJS, Mocha, Chai, WebDriverJS...
 
 Bootstrapped From Yearofmoo's AngularJS Seed: A starter AngularJS repository for getting started with AngularJS. Includes helpful unit testing tools, Protractor integration and coverage testing.
 
