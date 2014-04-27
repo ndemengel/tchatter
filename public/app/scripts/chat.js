@@ -8,7 +8,7 @@ angular.module('app.chat', ['app.message'])
 
   .controller('ChatCtrl',
   ['$scope', '$interval', 'messageService', 'welcomeMessage', function($scope, $interval, messageService,
-                                                                      welcomeMessage) {
+                                                                       welcomeMessage) {
     $scope.userMessages = [];
     $scope.welcome_message = welcomeMessage();
 
@@ -19,7 +19,7 @@ angular.module('app.chat', ['app.message'])
     };
 
     var lastRequestReturned = true;
-    var lastTimestamp = 0;
+    var lastId = 0;
 
     function retrieveLastMessages() {
       if (!lastRequestReturned) {
@@ -28,17 +28,24 @@ angular.module('app.chat', ['app.message'])
 
       lastRequestReturned = false;
 
-      messageService.getMessagesSince(lastTimestamp, function(success, data) {
+      messageService.getMessagesSince(lastId, function(success, data) {
         lastRequestReturned = true;
-        if (success) {
-          if (data.length !== 0) {
-            lastTimestamp = data[data.length - 1].time;
-          }
-          $scope.userMessages = $scope.userMessages.concat(data);
+        if (!success || data.length === 0) {
+          return;
         }
+
+        // Ensure filtering of messages to handle parallel requests
+        var filteredData = data.filter(function(message) {
+          return message.id > lastId;
+        });
+
+        $scope.userMessages = $scope.userMessages.concat(filteredData);
+
+        lastId = filteredData[filteredData.length - 1].id;
       });
     }
 
+    // TODO only perform new request when last one has been received
     $interval(retrieveLastMessages, 1000);
     retrieveLastMessages();
   }]);

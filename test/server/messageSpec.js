@@ -22,9 +22,10 @@ describe('Message Service (REST)', function() {
     if (expected) {
       expect(data).to.deep.equal(expected);
     }
+  }
 
-    // allow for future expectations on data
-    return data;
+  function getJsonData() {
+    return JSON.parse(response._getData());
   }
 
   function requestWithBody(body) {
@@ -43,12 +44,12 @@ describe('Message Service (REST)', function() {
     messageService.postMessage(requestWithBody({ msg: msg }), response);
   }
 
-  function resetResponse() {
+  function resetMockResponse() {
     response = httpMocks.createResponse();
   }
 
   beforeEach(function() {
-    resetResponse();
+    resetMockResponse();
   });
 
   it('should accept messages', function() {
@@ -62,55 +63,58 @@ describe('Message Service (REST)', function() {
     expectJson({ success: true });
   });
 
-  it.skip('should only return messages received after requested time', function() {
+  it('should only return messages received after requested id', function() {
     // given existing messages
     postMessage('Message 1');
     postMessage('Message 2');
     postMessage('Message 3');
-    resetResponse();
+    resetMockResponse();
 
     // when querying messages
-    var request = requestWithParams({ sinceTime: 0 });
+    var request = requestWithParams({ afterId: 0 });
     messageService.getLastMessagesSince(request, response);
 
     // then
-    var firstMessages = expectJson();
+    expectJson();
+    var firstMessages = getJsonData();
     expect(firstMessages).to.have.length(3);
-    expect(firstMessages).to.have.deep.property('[0].msg', 'Message 1');
-    expect(firstMessages).to.have.deep.property('[1].msg', 'Message 2');
-    expect(firstMessages).to.have.deep.property('[2].msg', 'Message 3');
+    expect(firstMessages[0].msg).to.equal('Message 1');
+    expect(firstMessages[1].msg).to.equal('Message 2');
+    expect(firstMessages[2].msg).to.equal('Message 3');
 
     // given some new messages
     postMessage('Message 4');
     postMessage('Message 5');
 
     // when querying new messages
-    resetResponse();
-    request = requestWithParams({ sinceTime: firstMessages[2].time });
+    resetMockResponse();
+    request = requestWithParams({ afterId: firstMessages[2].id });
     messageService.getLastMessagesSince(request, response);
 
     // then
-    var newMessages = expectJson();
+    expectJson();
+    var newMessages = getJsonData();
     expect(newMessages).to.have.length(2);
-    expect(newMessages).to.have.deep.property('[0].msg', 'Message 3');
-    expect(newMessages).to.have.deep.property('[1].msg', 'Message 4');
+    expect(newMessages[0].msg).to.equal('Message 4');
+    expect(newMessages[1].msg).to.equal('Message 5');
   });
 
-  it.skip('should return all messages when no time is given', function() {
+  it('should return all messages when no id is given', function() {
     // given existing messages
     postMessage('Message 1');
     postMessage('Message 2');
-    resetResponse();
+    resetMockResponse();
 
     // when querying messages without time
     var request = requestWithParams();
     messageService.getLastMessagesSince(request, response);
 
     // then
-    expectJson()
-      .to.have.length(2)
-      .to.have.deep.property('[0].msg', 'Message 1')
-      .to.have.deep.property('[1].msg', 'Message 2');
+    expectJson();
+    var messages = getJsonData();
+    expect(messages).to.have.length(2);
+    expect(messages[0].msg).to.equal('Message 1');
+    expect(messages[1].msg).to.equal('Message 2');
   });
 
 });

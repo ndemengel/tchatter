@@ -1,3 +1,5 @@
+var testDriver = require('./test/e2e/util/test-context');
+
 process.on('SIGINT', function() {
   try {
     console.log('Shutting down server...');
@@ -21,15 +23,8 @@ module.exports = function(grunt) {
       options: {
         stdout: true
       },
-      selenium: {
-        command: './selenium/start',
-        options: {
-          stdout: false,
-          async: true
-        }
-      },
-      protractor_install: {
-        command: 'node ./node_modules/protractor/bin/webdriver-manager update'
+      selenium_install: {
+        command: './bin/webdriver-manager update'
       },
       npm_install: {
         command: 'npm install'
@@ -66,22 +61,12 @@ module.exports = function(grunt) {
           reporter: 'spec'
         },
         src: ['test/server/**/*.js']
-      }
-    },
-
-    protractor: {
-      options: {
-        keepAlive: true,
-        configFile: "./test/protractor.conf.js"
       },
-      singlerun: {},
-      auto: {
-        keepAlive: true
-        //        options: {
-        //          args: {
-        //            seleniumPort: 4444
-        //          }
-        //        }
+      e2e: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/e2e/**/*.js']
       }
     },
 
@@ -126,14 +111,22 @@ module.exports = function(grunt) {
         files: ['public/app/styles/**/*.css', 'public/app/scripts/**/*.js'],
         tasks: ['concat']
       },
-      protractor: {
-        files: ['app.js', 'lib/**/*.js', 'public/app/**/*', 'test/e2e/**/*.js'],
-        tasks: ['protractor:auto']
-      },
-      mocha: {
+      mocha_unit: {
         files: ['app.js', 'lib/**/*.js', 'test/server/**/*.js'],
         tasks: ['mochaTest:unit']
+      },
+      mocha_e2e: {
+        files: ['app.js', 'lib/**/*.js', 'public/app/assets/**/*.js', 'test/e2e/**/*.js'],
+        tasks: ['mochaTest:e2e']
       }
+    },
+
+    concurrent: {
+      options: {
+        logConcurrentOutput: true
+      },
+      watch_e2e: ['watch:assets', 'watch:mocha_e2e'],
+      watch_all_tests: ['watch:mocha_unit', 'karma:unit_auto', 'watch:assets', 'watch:mocha_e2e']
     },
 
     open: {
@@ -169,31 +162,41 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-concurrent');
+
+  grunt.registerTask('selenium:standalone_start', 'Start a standalone Selenium server', function() {
+    var done = this.async();
+    testDriver.startSelenium(done);
+  });
+
+  grunt.registerTask('selenium:standalone_stop', 'Stop standalone Selenium server', function() {
+    var done = this.async();
+    testDriver.stopSelenium(done);
+  });
+
   //single run tests
   grunt.registerTask('test', ['jshint', 'test:server', 'test:client', 'test:e2e']);
   grunt.registerTask('test:client', ['karma:unit']);
+  grunt.registerTask('test:e2e', ['selenium:standalone_start', 'mochaTest:e2e', 'selenium:standalone_stop']);
   grunt.registerTask('test:server', ['mochaTest:unit']);
-  grunt.registerTask('test:e2e', ['protractor:singlerun']);
 
   //autotest and watch tests
-  // TODO install grunt-concurrent to defint autotest
-  grunt.registerTask('autotest', ['autotest:server', 'autotest:client', 'autotest:e2e']);
+  grunt.registerTask('autotest', ['concurrent:watch_all_tests']);
   grunt.registerTask('autotest:client', ['karma:unit_auto']);
-  grunt.registerTask('autotest:server', ['watch:mocha']);
-  // TODO install grunt-concurrent to only run some targets of "watch" concurrently
-  grunt.registerTask('autotest:e2e', ['watch']);
+  grunt.registerTask('autotest:e2e', ['selenium:standalone_start', 'concurrent:watch_e2e', 'selenium:standalone_stop']);
+  grunt.registerTask('autotest:server', ['watch:mocha_unit']);
 
   //coverage testing
   grunt.registerTask('test:coverage', ['karma:unit_coverage']);
   grunt.registerTask('coverage', ['karma:unit_coverage', 'open:coverage', 'connect:coverage']);
 
   //installation-related
-  grunt.registerTask('install', ['update', 'shell:protractor_install']);
-  grunt.registerTask('update', ['shell:npm_install', 'concat']);
+  grunt.registerTask('install', ['shell:npm_install', 'shell:selenium_install']);
+  grunt.registerTask('update', ['install', 'concat']);
+
+  //development
+  grunt.registerTask('dev', ['update', 'shell:start', 'open:app', 'watch:assets']);
 
   //defaults
   grunt.registerTask('default', ['dev']);
-
-  //development
-  grunt.registerTask('dev', ['update', 'shell:start', 'watch:assets', 'open:app']);
 };

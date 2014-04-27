@@ -1,57 +1,53 @@
-var appDriver = require('./driver');
-
-var chai = require('chai');
-var chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised);
-
-var expect = chai.expect;
-
-var exec = require('child_process').exec;
-var app = require('../../app');
+var ctx = require('./util/test-context'),
+  controlFlow = ctx.controlFlow,
+  appDriver = ctx.appDriver,
+  expect = ctx.expect;
 
 describe('Chat Page', function() {
 
-  var server;
+  beforeEach(ctx.setUpTest);
 
-  beforeEach(function() {
-    app.start(9999);
-  });
+  afterEach(ctx.tearDownTest);
 
-  afterEach(app.stop);
-
-  it('should welcome the user', function() {
+  it('should welcome the user', function(done) {
     // when
-    appDriver.openApp();
+    appDriver().openApp();
     // then
-    expect(appDriver.getViewText()).to.eventually.equal('Welcome to Tchatter...');
+    expect(appDriver().getViewText()).to.eventually.equal('Welcome to Tchatter...');
+
+    controlFlow().execute(done);
   });
 
-  it('should display entered message in chat history', function() {
+  it('should display entered message in chat history', function(done) {
     // given
-    appDriver.openApp();
+    appDriver().openApp();
     var USER_MESSAGE = 'Hello world';
 
     // when
-    appDriver.sendMessage(USER_MESSAGE);
-    appDriver.wait(1000);
+    appDriver().sendMessage(USER_MESSAGE);
+    appDriver().sleep(1000);
 
     // then
-    expect(appDriver.getHistoryContent()).to.eventually.contain(USER_MESSAGE);
+    expect(appDriver().getHistoryContent()).to.eventually.contain(USER_MESSAGE);
+
+    controlFlow().execute(done);
   });
 
-  it.skip('should stack entered messages in chat history', function() {
+  it('should stack entered messages in chat history', function(done) {
     // given
-    appDriver.openApp();
-    var FIRST_USER_MESSAGE = 'Hello world';
+    appDriver().openApp();
+    var FIRST_USER_MESSAGE = 'Hello John';
     var SECOND_USER_MESSAGE = 'How are you ?';
 
     // when
-    appDriver.sendMessage(FIRST_USER_MESSAGE);
-    appDriver.sendMessage(SECOND_USER_MESSAGE);
-    appDriver.wait(1000);
+    appDriver().sendMessage(FIRST_USER_MESSAGE);
+    appDriver().sendMessage(SECOND_USER_MESSAGE);
+    appDriver().sleep(1000);
 
     // then
-    expect(appDriver.getHistoryContent()).to.eventually.equal(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE);
+    expect(appDriver().getHistoryContent()).to.eventually.equal(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE);
+
+    controlFlow().execute(done);
   });
 
 });

@@ -1,15 +1,13 @@
 describe('Chat Module', function() {
   var messageService, $mockInterval;
 
-  var someTimestamp = 99;
-
   beforeEach(module('app.chat'));
 
   beforeEach(inject(function($controller, $rootScope) {
     messageService = {
       messagesToReturn: [],
-      getMessagesSince: function(time, cb) {
-        this.requestedTime = time;
+      getMessagesSince: function(lastId, cb) {
+        this.givenLastId = lastId;
         this.messagesRetrieved = true;
         cb(true, this.messagesToReturn);
       },
@@ -58,13 +56,13 @@ describe('Chat Module', function() {
   it("should not update displayed messages when new messages couldn't be retrieved", inject(function($rootScope) {
     // given
     var alreadyPresentMessages = [
-      {msg: 'messages', time: 1},
-      {msg: 'already', time: 2},
-      {msg: 'present', time: 3}
+      {msg: 'messages', time: 100, id: 1},
+      {msg: 'already', time: 200, id: 2},
+      {msg: 'present', time: 300, id: 3}
     ];
     $rootScope.userMessages = alreadyPresentMessages;
 
-    messageService.getMessagesSince = function(_time, cb) {
+    messageService.getMessagesSince = function(_lastId, cb) {
       cb(false, 'irrelevant error');
     };
 
@@ -78,16 +76,16 @@ describe('Chat Module', function() {
   it("should only request new messages", inject(function($rootScope) {
     // given a first bag of messages has been received
     var firstBagOfMessages = [
-      {msg: 'message 1', time: 1},
-      {msg: 'message 2', time: 2}
+      {msg: 'message 1', time: 100, id: 1},
+      {msg: 'message 2', time: 200, id: 2}
     ];
     messageService.willReturnMessages(firstBagOfMessages);
     $mockInterval.trigger();
 
     // given a new bag of messages is ready to be queried
     var secondBagOfMessages = [
-      {msg: 'message 3', time: 3},
-      {msg: 'message 4', time: 4}
+      {msg: 'message 3', time: 300, id: 3},
+      {msg: 'message 4', time: 400, id: 4}
     ];
     messageService.willReturnMessages(secondBagOfMessages);
 
@@ -95,7 +93,7 @@ describe('Chat Module', function() {
     $mockInterval.trigger();
 
     // then
-    expect(messageService.requestedTime).to.equal(2);
+    expect(messageService.givenLastId).to.equal(2);
     expect($rootScope.userMessages).to.deep.equal(firstBagOfMessages.concat(secondBagOfMessages));
   }));
 });

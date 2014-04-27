@@ -32,7 +32,10 @@ module.exports = {
 };
 
 if (module === require.main) {
-  start(8080, function() {
-    console.log('App started at http://localhost:8080/');
+  var port = process.argv[2];
+  port = port ? parseInt(port, 10) : 8080;
+
+  start(port, function() {
+    console.log('App started at http://localhost:' + port + '/');
   });
 }

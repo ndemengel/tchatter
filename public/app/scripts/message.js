@@ -20,8 +20,8 @@ angular.module('app.message', [])
       postMessage: function(msg, cb) {
         handleResponse($http.post('/msg', {msg: msg}), cb);
       },
-      getMessagesSince: function(time, cb) {
-        handleResponse($http.get('/msg?sinceTime=' + time), cb);
+      getMessagesSince: function(afterId, cb) {
+        handleResponse($http.get('/msg?afterId=' + afterId), cb);
       }
     };
   }]);
