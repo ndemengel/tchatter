@@ -1,5 +1,5 @@
 describe('Chat Module', function() {
-  var messageService, $mockInterval;
+  var messageService, $mockTimeout;
 
   beforeEach(module('app.chat'));
 
@@ -19,8 +19,8 @@ describe('Chat Module', function() {
       }
     };
 
-    $mockInterval = {
-      $interval: function(func, delay) {
+    $mockTimeout = {
+      $timeout: function(func, delay) {
         this.func = func;
       },
       trigger: function() {
@@ -31,7 +31,7 @@ describe('Chat Module', function() {
     $controller('ChatCtrl', {
       messageService: messageService,
       $scope: $rootScope,
-      $interval: $mockInterval.$interval.bind($mockInterval)
+      $timeout: $mockTimeout.$timeout.bind($mockTimeout)
     });
   }));
 
@@ -67,7 +67,7 @@ describe('Chat Module', function() {
     };
 
     // when
-    $mockInterval.trigger();
+    $mockTimeout.trigger();
 
     // then
     expect($rootScope.userMessages).to.deep.equal(alreadyPresentMessages);
@@ -80,7 +80,7 @@ describe('Chat Module', function() {
       {msg: 'message 2', time: 200, id: 2}
     ];
     messageService.willReturnMessages(firstBagOfMessages);
-    $mockInterval.trigger();
+    $mockTimeout.trigger();
 
     // given a new bag of messages is ready to be queried
     var secondBagOfMessages = [
@@ -90,7 +90,7 @@ describe('Chat Module', function() {
     messageService.willReturnMessages(secondBagOfMessages);
 
     // when
-    $mockInterval.trigger();
+    $mockTimeout.trigger();
 
     // then
     expect(messageService.givenLastId).to.equal(2);

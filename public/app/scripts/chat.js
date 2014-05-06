@@ -7,8 +7,8 @@ angular.module('app.chat', ['app.message'])
   })
 
   .controller('ChatCtrl',
-  ['$scope', '$interval', 'messageService', 'welcomeMessage', function($scope, $interval, messageService,
-                                                                       welcomeMessage) {
+  ['$scope', '$timeout', 'messageService', 'welcomeMessage', function($scope, $timeout, messageService,
+                                                                      welcomeMessage) {
     $scope.userMessages = [];
     $scope.welcome_message = welcomeMessage();
 
@@ -18,18 +18,12 @@ angular.module('app.chat', ['app.message'])
       });
     };
 
-    var lastRequestReturned = true;
     var lastId = 0;
 
     function retrieveLastMessages() {
-      if (!lastRequestReturned) {
-        return;
-      }
-
-      lastRequestReturned = false;
-
       messageService.getMessagesSince(lastId, function(success, data) {
-        lastRequestReturned = true;
+        $timeout(retrieveLastMessages, 1000);
+
         if (!success || data.length === 0) {
           return;
         }
@@ -45,7 +39,5 @@ angular.module('app.chat', ['app.message'])
       });
     }
 
-    // TODO only perform new request when last one has been received
-    $interval(retrieveLastMessages, 1000);
     retrieveLastMessages();
   }]);
