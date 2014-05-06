@@ -181,7 +181,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test:server', ['mochaTest:unit']);
 
   //autotest and watch tests
-  grunt.registerTask('autotest', ['concurrent:watch_all_tests']);
+  grunt.registerTask('autotest', ['selenium:standalone_start', 'concurrent:watch_all_tests', 'selenium:standalone_stop']);
   grunt.registerTask('autotest:client', ['karma:unit_auto']);
   grunt.registerTask('autotest:e2e', ['selenium:standalone_start', 'concurrent:watch_e2e', 'selenium:standalone_stop']);
   grunt.registerTask('autotest:server', ['watch:mocha_unit']);
