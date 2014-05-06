@@ -143,7 +143,8 @@ function setUpTest(done) {
   this.timeout(10000);
   startApp()
     .then(buildDrivers)
-    .then(done);
+    .then(done)
+    .thenCatch(stopApp);
 }
 
 /**
