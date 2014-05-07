@@ -50,4 +50,26 @@ describe('Chat Page', function() {
     controlFlow().execute(done);
   });
 
+  it('should display already existing messages', function(done) {
+    this.timeout(4000);
+
+    // given
+    appDriver().openApp();
+    var FIRST_USER_MESSAGE = 'Hello John';
+    var SECOND_USER_MESSAGE = 'How are you ?';
+
+    appDriver().sendMessage(FIRST_USER_MESSAGE);
+    appDriver().sendMessage(SECOND_USER_MESSAGE);
+
+    var newAppDriver = ctx.buildAppDriver(ctx.buildWebDriver());
+    newAppDriver.openApp();
+
+    newAppDriver.sleep(1000);
+
+    // then
+    expect(newAppDriver.getHistoryContent()).to.eventually.equal(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE);
+
+    controlFlow().execute(done);
+  });
+
 });
