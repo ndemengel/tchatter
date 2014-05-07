@@ -18,26 +18,7 @@ angular.module('app.chat', ['app.message'])
       });
     };
 
-    var lastId = 0;
-
-    function retrieveLastMessages() {
-      messageService.getMessagesSince(lastId, function(success, data) {
-        $timeout(retrieveLastMessages, 1000);
-
-        if (!success || data.length === 0) {
-          return;
-        }
-
-        // Ensure filtering of messages to handle parallel requests
-        var filteredData = data.filter(function(message) {
-          return message.id > lastId;
-        });
-
-        $scope.userMessages = $scope.userMessages.concat(filteredData);
-
-        lastId = filteredData[filteredData.length - 1].id;
-      });
-    }
-
-    retrieveLastMessages();
+    messageService.onMessage(function(messages) {
+      $scope.userMessages = $scope.userMessages.concat(messages);
+    });
   }]);

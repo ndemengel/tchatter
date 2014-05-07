@@ -11,8 +11,15 @@ describe('Chat Module', function() {
         this.messagesRetrieved = true;
         cb(true, this.messagesToReturn);
       },
-      postMessage: function(msg, cb) {
+      onMessage: function(cb) {
+        this.subscriberRegisteredForNewMessages = true;
+        this.messageListener = cb;
+      },
+      postMessage: function(msg, _cb) {
         this.postedMessage = msg;
+      },
+      receivesMessages: function(messages) {
+        this.messageListener(messages);
       },
       willReturnMessages: function(messages) {
         this.messagesToReturn = messages;
@@ -20,7 +27,7 @@ describe('Chat Module', function() {
     };
 
     $mockTimeout = {
-      $timeout: function(func, delay) {
+      $timeout: function(func, _delay) {
         this.func = func;
       },
       trigger: function() {
@@ -49,11 +56,11 @@ describe('Chat Module', function() {
     expect(messageService.postedMessage).to.equal('some message');
   }));
 
-  it("should retrieve existing messages upon instantiation", function() {
-    expect(messageService.messagesRetrieved).to.equal(true);
+  it("should listen for messages upon instantiation", function() {
+    expect(messageService.subscriberRegisteredForNewMessages).to.equal(true);
   });
 
-  it("should not update displayed messages when new messages couldn't be retrieved", inject(function($rootScope) {
+  it("should update displayed messages when new messages are received", inject(function($rootScope) {
     // given
     var alreadyPresentMessages = [
       {msg: 'messages', time: 100, id: 1},
@@ -62,38 +69,14 @@ describe('Chat Module', function() {
     ];
     $rootScope.userMessages = alreadyPresentMessages;
 
-    messageService.getMessagesSince = function(_lastId, cb) {
-      cb(false, 'irrelevant error');
-    };
-
     // when
-    $mockTimeout.trigger();
+    var newMessages = [
+      {msg: 'and', time: 400, id: 4},
+      {msg: 'more', time: 500, id: 5}
+    ];
+    messageService.receivesMessages(newMessages);
 
     // then
-    expect($rootScope.userMessages).to.deep.equal(alreadyPresentMessages);
-  }));
-
-  it("should only request new messages", inject(function($rootScope) {
-    // given a first bag of messages has been received
-    var firstBagOfMessages = [
-      {msg: 'message 1', time: 100, id: 1},
-      {msg: 'message 2', time: 200, id: 2}
-    ];
-    messageService.willReturnMessages(firstBagOfMessages);
-    $mockTimeout.trigger();
-
-    // given a new bag of messages is ready to be queried
-    var secondBagOfMessages = [
-      {msg: 'message 3', time: 300, id: 3},
-      {msg: 'message 4', time: 400, id: 4}
-    ];
-    messageService.willReturnMessages(secondBagOfMessages);
-
-    // when
-    $mockTimeout.trigger();
-
-    // then
-    expect(messageService.givenLastId).to.equal(2);
-    expect($rootScope.userMessages).to.deep.equal(firstBagOfMessages.concat(secondBagOfMessages));
+    expect($rootScope.userMessages).to.deep.equal(alreadyPresentMessages.concat(newMessages));
   }));
 });
