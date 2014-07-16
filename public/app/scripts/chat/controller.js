@@ -1,4 +1,4 @@
-angular.module('app.chat', ['app.message'])
+angular.module('app.chat.controller', ['app.chat.service'])
 
   .factory('welcomeMessage', function() {
     return function() {

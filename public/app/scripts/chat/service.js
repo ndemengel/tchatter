@@ -1,6 +1,10 @@
-angular.module('app.message', [])
+angular.module('app.chat.service', ['app.chat.transport'])
 
-  .factory('messageService', ['$http', '$timeout', function($http, $timeout) {
+  .factory('messageService', ['$http', '$timeout', 'transport', function($http, $timeout, transport) {
+
+    transport.onMessage(function(e) {
+      console.log(e);
+    });
 
     function handleResponse(promise, cb) {
       promise
@@ -47,6 +51,7 @@ angular.module('app.message', [])
 
     return {
       postMessage: function postMessage(msg, cb) {
+        transport.send(msg);
         handleResponse($http.post('/msg', {msg: msg}), cb);
       },
 

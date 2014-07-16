@@ -1,4 +1,4 @@
-angular.module('tchatter', ['ngRoute', 'app.chat'])
+angular.module('tchatter', ['ngRoute', 'app.chat.controller'])
 
   .constant('TPL_PATH', '/templates')
 

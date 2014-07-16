@@ -2,7 +2,7 @@ describe('Message Service', function() {
 
   var messageService, $mockTimeout;
 
-  beforeEach(module('app.chat'));
+  beforeEach(module('app.chat.service'));
 
   beforeEach(function() {
 
@@ -16,7 +16,9 @@ describe('Message Service', function() {
     };
 
     module(function($provide) {
+      function noop() {};
       $provide.value('$timeout', $mockTimeout.$timeout.bind($mockTimeout));
+      $provide.value('transport', { onMessage: noop, send: noop });
     });
 
     inject(function($injector) {

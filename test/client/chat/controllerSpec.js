@@ -1,7 +1,7 @@
 describe('Chat Module', function() {
   var messageService, $mockTimeout;
 
-  beforeEach(module('app.chat'));
+  beforeEach(module('app.chat.controller'));
 
   beforeEach(inject(function($controller, $rootScope) {
     messageService = {
