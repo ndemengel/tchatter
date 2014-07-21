@@ -3,6 +3,7 @@
 .idea
 .project
 .settings
+.vagrant
 *.log
 node_modules
 bower_components
