@@ -134,9 +134,10 @@ describe('Message Service', function() {
       return new EventEmitter();
     }
 
-    function mockConnection(id) {
+    function mockConnection(connectionId, userColor) {
       var conn = new EventEmitter();
-      conn.id = id;
+      conn.id = connectionId;
+      conn.url = '/chat/' + userColor + '/j0evg2lj/websocket';
       conn.write = sinon.spy();
       return conn;
     }
@@ -151,7 +152,7 @@ describe('Message Service', function() {
     it('should welcome new users', function() {
       // given
       var socket = mockSocket();
-      var connection = mockConnection('id1');
+      var connection = mockConnection('id1', 'somecolor');
 
       // when
       messageService.listenToSocket(socket);
@@ -159,7 +160,7 @@ describe('Message Service', function() {
 
       // then
       expect(connection.write).to.have.been.calledWithMatch(
-        jsonContaining({ id: 1, msg: "Welcome id1", type: "userState"}));
+        jsonContaining({ id: 1, msg: "Welcome Mr somecolor", type: "userState"}));
     });
   });
 });
