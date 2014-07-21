@@ -1,6 +1,6 @@
 describe('Message Service', function() {
 
-  var messageService, $mockTimeout;
+  var messageService, $mockTimeout, $mockTransport;
 
   beforeEach(module('app.chat.service'));
 
@@ -15,10 +15,24 @@ describe('Message Service', function() {
       }
     };
 
+    $mockTransport = {
+      onMessage: function(cb) {
+        this.messagesListeners = this.messagesListeners || [];
+        this.messagesListeners.push(cb);
+      },
+      messageReceived: function(msg) {
+        this.messagesListeners.forEach(function(listener) {
+          listener(msg);
+        });
+      },
+      send: function(msg) {
+        this.lastSentMessage = msg;
+      }
+    };
+
     module(function($provide) {
-      function noop() {};
       $provide.value('$timeout', $mockTimeout.$timeout.bind($mockTimeout));
-      $provide.value('transport', { onMessage: noop, send: noop });
+      $provide.value('transport', $mockTransport);
     });
 
     inject(function($injector) {
@@ -27,73 +41,49 @@ describe('Message Service', function() {
 
   });
 
-  it('should post message', inject(function($httpBackend) {
-    // given
-    $httpBackend.expectPOST('/msg', {msg: 'Hello world'})
-      .respond(200, '{"success" : true}');
-
-    var callback = sinon.spy();
-
+  it('should post message', function() {
     // when
-    messageService.postMessage('Hello world', callback);
+    messageService.postMessage('Hello world');
 
     // then
-    $httpBackend.flush();
-    expect(callback.callCount).to.equal(1);
-    expect(callback).to.have.been.calledWith(true, { success: true });
-  }));
+    expect($mockTransport.lastSentMessage).to.equal('Hello world');
+  });
 
-  it('should retrieve messages issued after given time', inject(function($httpBackend) {
+  it('should retrieve last messages', inject(function($httpBackend) {
     // given
-    var aMessageId = 17;
-
-    $httpBackend.expectGET('/msg?afterId=' + aMessageId)
-      .respond(200, '[{"msg": "message 1", "id": 23, "time": 975}, {"msg": "message 2", "id": 42, "time": 1257}]');
-
-    var callback = sinon.spy();
-
-    // when
-    messageService.getMessagesSince(aMessageId, callback);
-
-    // then
-    $httpBackend.flush();
-    expect(callback.callCount).to.equal(1);
-    expect(callback).to.have.been.calledWith(true, [
-      {msg: "message 1", id: 23, time: 975},
-      {msg: "message 2", id: 42, time: 1257}
-    ]);
-  }));
-
-  it('should forward received new messages to subscribers', inject(function($httpBackend) {
-    // given
-    var callback = sinon.spy();
-
     $httpBackend.expectGET('/msg?afterId=0')
       .respond(200, '[{"msg": "message 1", "id": 23, "time": 975}, {"msg": "message 2", "id": 42, "time": 1257}]');
 
-    // when
-    messageService.onMessage(callback);
-
-    // then
-    $httpBackend.flush();
-    expect(callback.callCount).to.equal(1);
-    expect(callback).to.have.been.calledWith([
-      {msg: "message 1", id: 23, time: 975},
-      {msg: "message 2", id: 42, time: 1257}
-    ]);
-
-    // then given
-    $httpBackend.expectGET('/msg?afterId=42')
-      .respond(200, '[{"msg": "message 3", "id": 78, "time": 1975}]');
+    var callback = sinon.spy();
 
     // when
-    $mockTimeout.trigger();
+    messageService.retrieveLastMessages(callback);
 
     // then
     $httpBackend.flush();
     expect(callback.callCount).to.equal(2);
-    expect(callback).to.have.been.calledWith([
-      {msg: "message 3", id: 78, time: 1975}
-    ]);
+    expect(callback).to.have.been.calledWith({msg: "message 1", id: 23, time: 975});
+    expect(callback).to.have.been.calledWith({msg: "message 2", id: 42, time: 1257});
   }));
+
+  it('should forward received new messages to subscribers', function() {
+    // given
+    var subscriber1 = sinon.spy();
+    messageService.onMessage(subscriber1);
+    var subscriber2 = sinon.spy();
+    messageService.onMessage(subscriber2);
+
+    // when
+    $mockTransport.messageReceived({type: 'message', data: '{"msg": "message 1", "id": 23, "time": 975}'});
+    $mockTransport.messageReceived({type: 'message', data: '{"msg": "message 2", "id": 42, "time": 1257}'});
+
+    // then
+    expect(subscriber1.callCount).to.equal(2);
+    expect(subscriber1).to.have.been.calledWith({msg: "message 1", id: 23, time: 975});
+    expect(subscriber1).to.have.been.calledWith({msg: "message 2", id: 42, time: 1257});
+
+    expect(subscriber2.callCount).to.equal(2);
+    expect(subscriber2).to.have.been.calledWith({msg: "message 1", id: 23, time: 975});
+    expect(subscriber2).to.have.been.calledWith({msg: "message 2", id: 42, time: 1257});
+  });
 });

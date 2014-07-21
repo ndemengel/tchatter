@@ -7,18 +7,30 @@ angular.module('app.chat.controller', ['app.chat.service'])
   })
 
   .controller('ChatCtrl',
-  ['$scope', '$timeout', 'messageService', 'welcomeMessage', function($scope, $timeout, messageService,
-                                                                      welcomeMessage) {
+      ['$scope', '$timeout', 'messageService', 'welcomeMessage',
+        function($scope, $timeout, messageService, welcomeMessage) {
+
     $scope.userMessages = [];
-    $scope.welcome_message = welcomeMessage();
+    $scope.welcomeMessage = welcomeMessage();
 
     $scope.submitMessage = function submitMessage() {
-      messageService.postMessage($scope.userMessage, function(success) {
-        console.log('Success? ' + success);
-      });
+      var msgContent = $scope.newMessage;
+
+      messageService.postMessage(msgContent);
+
+      $scope.userMessages.push({ msg: msgContent });
+
+      // clear input
+      $scope.newMessage = null;
     };
 
-    messageService.onMessage(function(messages) {
-      $scope.userMessages = $scope.userMessages.concat(messages);
-    });
+    function addToHistory(message) {
+      $scope.$apply(function() {
+        $scope.userMessages.push(message);
+      });
+    }
+
+    messageService.retrieveLastMessages(addToHistory);
+
+    messageService.onMessage(addToHistory);
   }]);

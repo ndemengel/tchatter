@@ -2,10 +2,6 @@ angular.module('app.chat.service', ['app.chat.transport'])
 
   .factory('messageService', ['$http', '$timeout', 'transport', function($http, $timeout, transport) {
 
-    transport.onMessage(function(e) {
-      console.log(e);
-    });
-
     function handleResponse(promise, cb) {
       promise
         .success(function(data) {
@@ -24,45 +20,33 @@ angular.module('app.chat.service', ['app.chat.transport'])
       handleResponse($http.get('/msg?afterId=' + afterId), cb);
     }
 
-    var lastId = 0;
-
-    var callbacks = [];
-
-    function retrieveLastMessages() {
-      getMessagesSince(lastId, function(success, data) {
-        $timeout(retrieveLastMessages, 1000);
-
-        if (!success || data.length === 0) {
+    function retrieveLastMessages(cb) {
+      getMessagesSince(0, function(success, messages) {
+        if (!success || messages.length === 0) {
           return;
         }
 
-        // Ensure filtering of messages to handle parallel requests
-        var filteredData = data.filter(function(message) {
-          return message.id > lastId;
-        });
-
-        lastId = filteredData[filteredData.length - 1].id;
-
-        callbacks.forEach(function(cb) {
-          cb(filteredData);
+        messages.forEach(function(msg) {
+          cb(msg);
         });
       });
     }
 
-    return {
-      postMessage: function postMessage(msg, cb) {
-        transport.send(msg);
-        handleResponse($http.post('/msg', {msg: msg}), cb);
-      },
+    function postMessage(msg) {
+      transport.send(msg);
+    }
 
-      getMessagesSince: getMessagesSince,
-
-      onMessage: function onMessage(cb) {
-        callbacks.push(cb);
-
-        if (callbacks.length === 1) {
-          retrieveLastMessages();
+    function onMessage(cb) {
+      transport.onMessage(function(event) {
+        if (event.type === 'message' && event.data) {
+          cb(JSON.parse(event.data));
         }
-      }
+      });
+    }
+
+    return {
+      postMessage: postMessage,
+      retrieveLastMessages: retrieveLastMessages,
+      onMessage: onMessage
     };
   }]);

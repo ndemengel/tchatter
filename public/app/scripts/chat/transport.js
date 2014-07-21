@@ -4,7 +4,7 @@ angular.module('app.chat.transport', [])
 
     var messageListeners = [];
 
-    var sock = new SockJS('http://localhost:8080/chat');
+    var sock = new SockJS(window.location.origin + '/chat');
 
     sock.onmessage = function(e) {
       messageListeners.forEach(function(fn) {

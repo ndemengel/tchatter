@@ -4,7 +4,7 @@
   "repository": "https://github.com/ndemengel/tchatter.git",
   "scripts": {
     "postinstall": "node ./node_modules/bower/bin/bower install",
-    "start": "./node_modules/forever/bin/forever start --watch --watchIgnore '*.log' -l forever.log --append -o app.log -e err.log app.js",
+    "start": "./node_modules/forever/bin/forever start --watch --watchIgnore '*.log' --watchIgnore public -l forever.log --append -o app.log -e err.log app.js",
     "stop": "./node_modules/forever/bin/forever stop app.js"
   },
   "devDependencies": {
@@ -48,7 +48,8 @@
     "proxyquire": "^0.6.0",
     "requirejs": "^2.1.11",
     "selenium-webdriver": "^2.41.0",
-    "sinon": "^1.9.0"
+    "sinon": "^1.9.0",
+    "sinon-chai": "^2.5.0"
   },
   "dependencies": {
     "express": "^3.5.1",

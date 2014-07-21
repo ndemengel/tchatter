@@ -23,6 +23,7 @@ var appServerProcess;
 
 // global drivers
 var driver;
+var drivers = [];
 var appDriver;
 
 /**
@@ -47,10 +48,15 @@ function buildWebDriver() {
   var capabilities = webdriver.Capabilities.phantomjs();
   capabilities.set('phantomjs.binary.path', path.join(__dirname, '../../../node_modules/phantomjs/bin/phantomjs'));
   capabilities.set('takesScreenshot', true);
-  return new webdriver.Builder()
+
+  var d = new webdriver.Builder()
     .usingServer('http://localhost:4444/wd/hub')
     .withCapabilities(capabilities)
     .build();
+
+  drivers.push(d);
+
+  return d;
 }
 
 /**
@@ -79,8 +85,21 @@ function buildDrivers() {
  * @returns {Promise}
  */
 function quitDriver() {
-  if (driver) {
-    return driver.quit();
+  var promise = null;
+
+  drivers.forEach(function(d) {
+    if (promise) {
+      promise.then(d.quit.bind(d));
+    }
+    else {
+      promise = d.quit();
+    }
+  });
+
+  drivers.length = 0;
+
+  if (promise) {
+    return promise;
   }
   return webdriver.promise.fulfilled();
 }
@@ -165,6 +184,36 @@ function tearDownTest(done) {
     .then(done);
 }
 
+function e2eTestDecorator(testFn) {
+  return function(done) {
+    this.timeout(10000);
+
+    var called = false;
+    function singleCallDone(maybeError) {
+      if (!called) {
+        try {
+          done(maybeError);
+        } finally {
+          called = true;
+        }
+      }
+    }
+
+    var maybeSthToNotify = testFn.call(this);
+    if (maybeSthToNotify && maybeSthToNotify.thenCatch) {
+      maybeSthToNotify.thenCatch(singleCallDone);
+    }
+
+    // error or success cases, when using expect(xx).to.eventually.yy:
+    else if (maybeSthToNotify && maybeSthToNotify.notify) {
+      maybeSthToNotify.notify(singleCallDone);
+    }
+
+    // success cases: singleCallDone may already have been called, but it is not a problem
+    webdriver.promise.controlFlow().execute(singleCallDone);
+  };
+}
+
 module.exports = {
   appDriver: function() { return appDriver; },
   buildDrivers: buildDrivers,
@@ -172,6 +221,7 @@ module.exports = {
   buildWebDriver: buildWebDriver,
   controlFlow: webdriver.promise.controlFlow,
   driver: function() { return driver; },
+  e2eTest: e2eTestDecorator,
   expect: chai.expect,
   quitDriver: quitDriver,
   startApp: startApp,

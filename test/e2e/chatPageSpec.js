@@ -9,67 +9,71 @@ describe('Chat Page', function() {
 
   afterEach(ctx.tearDownTest);
 
-  it('should welcome the user', function(done) {
+  function strEndsWith(str, expectedEnd) {
+    if (expectedEnd.length > str.length) {
+      return false;
+    }
+    return str.substr(str.length - expectedEnd.length) === expectedEnd;
+  }
+
+  function endsWith(expectedEnd) {
+    return function(actualStr) {
+      return strEndsWith(actualStr, expectedEnd);
+    };
+  }
+
+  it('should welcome the user', ctx.e2eTest(function() {
     // when
     appDriver().openApp();
     // then
-    expect(appDriver().getViewText()).to.eventually.equal('Welcome to Tchatter...');
+    return expect(appDriver().getViewText()).to.eventually.equal('Welcome to Tchatter...');
+  }));
 
-    controlFlow().execute(done);
-  });
-
-  it('should display entered message in chat history', function(done) {
+  it('should display entered message in chat history', ctx.e2eTest(function() {
     // given
     appDriver().openApp();
     var USER_MESSAGE = 'Hello world';
 
     // when
     appDriver().sendMessage(USER_MESSAGE);
-    appDriver().sleep(1000);
 
     // then
-    expect(appDriver().getHistoryContent()).to.eventually.contain(USER_MESSAGE);
+    return expect(appDriver().getHistoryContent()).to.eventually.contain(USER_MESSAGE);
+  }));
 
-    controlFlow().execute(done);
-  });
-
-  it('should stack entered messages in chat history', function(done) {
+  it('should stack entered messages in chat history', ctx.e2eTest(function() {
     // given
     appDriver().openApp();
     var FIRST_USER_MESSAGE = 'Hello John';
-    var SECOND_USER_MESSAGE = 'How are you ?';
+    var SECOND_USER_MESSAGE = 'How are you?';
 
     // when
     appDriver().sendMessage(FIRST_USER_MESSAGE);
     appDriver().sendMessage(SECOND_USER_MESSAGE);
-    appDriver().sleep(1000);
 
     // then
-    expect(appDriver().getHistoryContent()).to.eventually.equal(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE);
+    return expect(appDriver().getHistoryContent()).to.eventually
+      .satisfy(endsWith(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE));
+  }));
 
-    controlFlow().execute(done);
-  });
-
-  it('should display already existing messages', function(done) {
-    this.timeout(4000);
-
+  it('should display already existing messages', ctx.e2eTest(function() {
     // given
     appDriver().openApp();
     var FIRST_USER_MESSAGE = 'Hello John';
-    var SECOND_USER_MESSAGE = 'How are you ?';
+    var SECOND_USER_MESSAGE = 'How are you?';
 
     appDriver().sendMessage(FIRST_USER_MESSAGE);
     appDriver().sendMessage(SECOND_USER_MESSAGE);
 
+    // when
     var newAppDriver = ctx.buildAppDriver(ctx.buildWebDriver());
     newAppDriver.openApp();
 
     newAppDriver.sleep(1000);
 
     // then
-    expect(newAppDriver.getHistoryContent()).to.eventually.equal(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE);
-
-    controlFlow().execute(done);
-  });
+    return expect(newAppDriver.getHistoryContent()).to.eventually
+      .contain(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE);
+  }));
 
 });

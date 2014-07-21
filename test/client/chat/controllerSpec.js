@@ -5,12 +5,7 @@ describe('Chat Module', function() {
 
   beforeEach(inject(function($controller, $rootScope) {
     messageService = {
-      messagesToReturn: [],
-      getMessagesSince: function(lastId, cb) {
-        this.givenLastId = lastId;
-        this.messagesRetrieved = true;
-        cb(true, this.messagesToReturn);
-      },
+      retrieveLastMessages: function noop() { },
       onMessage: function(cb) {
         this.subscriberRegisteredForNewMessages = true;
         this.messageListener = cb;
@@ -18,11 +13,8 @@ describe('Chat Module', function() {
       postMessage: function(msg, _cb) {
         this.postedMessage = msg;
       },
-      receivesMessages: function(messages) {
-        this.messageListener(messages);
-      },
-      willReturnMessages: function(messages) {
-        this.messagesToReturn = messages;
+      messageReceived: function(msg) {
+        this.messageListener(msg);
       }
     };
 
@@ -48,7 +40,7 @@ describe('Chat Module', function() {
 
   it('should post user message upon submit', inject(function($rootScope) {
     // given
-    $rootScope.userMessage = 'some message';
+    $rootScope.newMessage = 'some message';
     // when
     $rootScope.submitMessage();
 
@@ -67,14 +59,15 @@ describe('Chat Module', function() {
       {msg: 'already', time: 200, id: 2},
       {msg: 'present', time: 300, id: 3}
     ];
-    $rootScope.userMessages = alreadyPresentMessages;
+    $rootScope.userMessages = alreadyPresentMessages.slice(0);
 
     // when
     var newMessages = [
       {msg: 'and', time: 400, id: 4},
       {msg: 'more', time: 500, id: 5}
     ];
-    messageService.receivesMessages(newMessages);
+    messageService.messageReceived(newMessages[0]);
+    messageService.messageReceived(newMessages[1]);
 
     // then
     expect($rootScope.userMessages).to.deep.equal(alreadyPresentMessages.concat(newMessages));

@@ -178,7 +178,7 @@ module.exports = function(grunt) {
   //single run tests
   grunt.registerTask('test', ['jshint', 'test:server', 'test:client', 'test:e2e']);
   grunt.registerTask('test:client', ['karma:unit']);
-  grunt.registerTask('test:e2e', ['selenium:standalone_start', 'mochaTest:e2e', 'selenium:standalone_stop']);
+  grunt.registerTask('test:e2e', ['concat', 'selenium:standalone_start', 'mochaTest:e2e', 'selenium:standalone_stop']);
   grunt.registerTask('test:server', ['mochaTest:unit']);
 
   //autotest and watch tests
