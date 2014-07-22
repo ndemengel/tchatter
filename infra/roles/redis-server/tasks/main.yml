@@ -1,0 +1,18 @@
+---
+- name: create tchatter infra work directory
+  file: path={{ redis_server_docker_dir }} state=directory
+
+- name: copy redis-server Dockerfile
+  template: src=Dockerfile.j2 dest={{ redis_server_docker_dir }}/Dockerfile
+
+- name: check whether a docker image already exists for redis-server
+  shell: docker images | grep tchatter/redis-server
+  ignore_errors: yes
+  register: redis_image_check
+
+- name: create docker image
+  command: docker build -t tchatter/redis-server {{ redis_server_docker_dir }}
+  when: redis_image_check|failed
+
+- name: launch docker image
+  docker: image=tchatter/redis-server ports={{ redis_server_port }} name=redis-server

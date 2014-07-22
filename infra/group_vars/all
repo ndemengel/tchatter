@@ -1,0 +1,4 @@
+local_infra_dir: '{{ inventory_dir }}/..'
+local_project_dir: '{{ local_infra_dir }}/..'
+redis_server_port: 6379
+tchatter_infra_work_dir: /var/lib/tchatter/infra

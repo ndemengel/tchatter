@@ -1,0 +1,2 @@
+---
+redis_server_docker_dir: '{{ tchatter_infra_work_dir }}/redis-server'
