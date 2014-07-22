@@ -24,7 +24,7 @@ module.exports = function(grunt) {
         stdout: true
       },
       selenium_install: {
-        command: './bin/webdriver-manager update'
+        command: './bin/webdriver-manager update --standalone true --chrome false'
       },
       npm_install: {
         command: 'npm install'
