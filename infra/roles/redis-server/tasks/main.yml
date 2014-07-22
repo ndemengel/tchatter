@@ -15,4 +15,4 @@
   when: redis_image_check|failed
 
 - name: launch docker image
-  docker: image=tchatter/redis-server ports={{ redis_server_port }} name=redis-server
+  docker: image=tchatter/redis-server name=redis-server state=running ports={{ redis_server_port }}:{{ redis_server_port }}
