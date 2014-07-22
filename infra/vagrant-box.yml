@@ -1,0 +1,28 @@
+---
+- hosts: all # as it is called by vagrant, only the vagrant box will be targeted
+  tasks:
+    - name: update apt cache (if not already done during the last 24 hours)
+      apt: update_cache=yes cache_valid_time=86400
+
+    - name: install required packages
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - apt-transport-https
+        - python-pip
+
+    - name: add docker apt repository
+      apt_repository: repo='deb https://get.docker.io/ubuntu docker main' state=present
+      register: apt_sources
+
+    - name: add docker apt key
+      command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+      when: apt_sources.changed
+
+    - name: install docker
+      apt: pkg=lxc-docker state=latest force=yes
+
+    - name: install docker-py
+      pip: name=docker-py state=latest
+
+    - name: add vagrant user to docker group
+      user: name=vagrant groups=docker
