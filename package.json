@@ -44,7 +44,7 @@
     "mocha": "^1.18.2",
     "node-mocks-http": "^1.0.3",
     "optimist": "^0.6.1",
-    "phantomjs": "^1.9.7-4",
+    "phantomjs": "^1.9.7-14",
     "proxyquire": "^0.6.0",
     "requirejs": "^2.1.11",
     "selenium-webdriver": "^2.41.0",
