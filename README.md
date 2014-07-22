@@ -13,7 +13,7 @@ Bootstrapped From Yearofmoo's AngularJS Seed: A starter AngularJS repository for
 ## Development
 
 1. `grunt dev`
-2. Go to: `http://localhost:8888`
+2. Go to: `http://localhost:8080`
 
 ## Testing
 
@@ -39,3 +39,12 @@ Bootstrapped From Yearofmoo's AngularJS Seed: A starter AngularJS repository for
 ### Coverage Testing
 
 `grunt coverage`
+
+## Vagrant installation
+`vagrant up`
+
+## Launching redis-server (needs Vagrant running)
+```
+cd infra
+ansible-playbook -i inventories/dev redis-server.yml
+```
