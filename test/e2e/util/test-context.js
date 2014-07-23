@@ -112,7 +112,7 @@ function runAnsiblePlay(name) {
   var ansibleProcess = childProcess.spawn('ansible-playbook', ['-i', 'inventories/dev', name], npmOptions);
 
   ansibleProcess.stderr.on('data', function(data) {
-    console.error('server: ' + data);
+    console.error('ansible: ' + data);
   });
 
   ansibleProcess.on('close', function(code) {
@@ -172,8 +172,8 @@ function startApp(maybePort) {
 
   appServerProcess.stderr.on('data', function(data) {
     // ignore connect's warning
-    if (!/deprecated/i.test(data)) {
-      console.error('server: ' + data);
+    if (!/deprecated/.test(data) && !/connect.3\.0/i.test(data)) {
+      console.error('server error: ' + data);
     }
   });
 
@@ -201,7 +201,7 @@ function stopApp() {
  * @see buildDrivers
  */
 function setUpTest(done) {
-  this.timeout(10000);
+  this.timeout(20000);
   startRedis()
     .then(startApp)
     .then(buildDrivers)

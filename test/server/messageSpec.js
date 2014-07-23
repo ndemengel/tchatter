@@ -2,7 +2,7 @@ var chai = require('chai'),
   EventEmitter = require('events').EventEmitter,
   expect = chai.expect,
   httpMocks = require('node-mocks-http'),
-  proxyquire = require('proxyquire').noPreserveCache(),
+  proxyquire = require('proxyquire').noCallThru().noPreserveCache(),
   sinon = require('sinon');
 
 chai.use(require('sinon-chai'));
@@ -25,7 +25,9 @@ describe('Message Service', function() {
       onMessage: function(cb) {
         this.messageListeners.push(cb);
       },
-      fetchLatestMessages: function(cb) {cb(this.messages);}
+      fetchLatestMessages: function(cb) {
+        cb(this.messages);
+      }
     };
 
     messageService = proxyquire('../../lib/message', {
