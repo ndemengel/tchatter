@@ -1,0 +1,6 @@
+---
+- include: redis-server.yml
+
+- hosts: docker-hosts
+  roles:
+    - tchatter-app

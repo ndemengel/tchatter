@@ -49,8 +49,24 @@ Bootstrapped From Yearofmoo's AngularJS Seed: A starter AngularJS repository for
 ## Vagrant installation
 `vagrant up`
 
-## Launching redis-server (needs Vagrant running)
+## Launching redis-server only (needs Vagrant running)
 ```
 cd infra
 ansible-playbook -i inventories/dev redis-server.yml
+```
+
+## Deploying tchatter-app only (needs Vagrant running)
+```
+cd infra
+ansible-playbook -i inventories/dev tchatter-app.yml
+```
+
+## Deploying whole infrastructure (needs Vagrant running)
+```
+npm run deploy
+```
+
+## Package tchatter-app
+```
+npm run package
 ```

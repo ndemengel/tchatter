@@ -1,4 +1,7 @@
+docker_host_project_dir: '/vagrant'
 local_infra_dir: '{{ inventory_dir }}/..'
 local_project_dir: '{{ local_infra_dir }}/..'
 redis_server_port: 6379
+tchatter_app_port: 8080
+tchatter_app_archive_name: 'tchatter.tar.gz'
 tchatter_infra_work_dir: /var/lib/tchatter/infra

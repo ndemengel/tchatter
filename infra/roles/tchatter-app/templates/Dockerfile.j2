@@ -1,0 +1,8 @@
+FROM        ubuntu:14.04
+RUN         apt-get update
+RUN         apt-get --assume-yes install nodejs npm nodejs-legacy
+ADD         {{ tchatter_app_archive_name }} .
+CMD         cd package \
+            && REDIS_PORT=$REDIS_PORT_6379_TCP_PORT REDIS_HOST=$REDIS_PORT_6379_TCP_ADDR npm start \
+            && tail -f app.log
+EXPOSE      {{ tchatter_app_port }}

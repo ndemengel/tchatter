@@ -31,7 +31,7 @@ module.exports = function(grunt) {
         command: 'npm install'
       },
       start: {
-        command: 'npm start'
+        command: 'npm run dev-start'
       },
       stop: {
         command: 'npm stop'

@@ -1,0 +1,33 @@
+---
+- name: create tchatter infra work directory
+  file: path={{ tchatter_app_docker_dir }} state=directory
+
+- name: copy tchatter-app Dockerfile
+  template: src=Dockerfile.j2 dest={{ tchatter_app_docker_dir }}/Dockerfile
+  register: dockerfile_copy
+
+- name: copy tchatter-app archive
+  copy: src={{ local_infra_dir }}/{{ tchatter_app_archive_name }} dest={{ tchatter_app_docker_dir }}/{{ tchatter_app_archive_name }}
+  register: archive_copy
+
+- name: create docker image
+  command: docker build -t tchatter/tchatter-app {{ tchatter_app_docker_dir }}
+  when: archive_copy.changed or dockerfile_copy.changed
+  register: image_create
+
+- name: kill existing docker container
+  docker: image=tchatter/tchatter-app name=tchatter-app state=killed
+  ignore_errors: yes
+  when: image_create.changed or (force_new_app_container is defined and force_new_app_container == "yes")
+
+- name: remove existing docker container
+  docker: image=tchatter/tchatter-app name=tchatter-app state=absent
+  when: image_create.changed or (force_new_app_container is defined and force_new_app_container == "yes")
+
+- name: create docker container from image
+  docker: image=tchatter/tchatter-app name=tchatter-app state=present detach=yes ports={{ tchatter_app_port }}:{{ tchatter_app_port }} links=redis-server:redis
+  when: image_create.changed or (force_new_app_container is defined and force_new_app_container == "yes")
+
+- name: start docker container
+  # using same args than creation to ensure args used if creation did not occur (because image did not change but container is absent for whatever reason)
+  docker: image=tchatter/tchatter-app name=tchatter-app state=running detach=yes ports={{ tchatter_app_port }}:{{ tchatter_app_port }} links=redis-server:redis

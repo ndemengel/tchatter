@@ -3,10 +3,21 @@
   "version": "0.0.1",
   "repository": "https://github.com/ndemengel/tchatter.git",
   "scripts": {
-    "postinstall": "node ./node_modules/bower/bin/bower install",
-    "start": "./node_modules/forever/bin/forever start --watch --watchIgnore '*.log' --watchIgnore public -l forever.log --append -o app.log -e err.log app.js",
+    "deploy": "npm run package && mv tchatter-*.tgz infra/tchatter.tar.gz && cd infra && ansible-playbook -i inventories/dev tchatter-app.yml --extra-vars=\"$ANSIBLE_EXTRA_VARS\"",
+    "dev-start": "./node_modules/forever/bin/forever start --watch --watchIgnore '*.log' --watchIgnore public -l forever.log --append -o app.log -e app.log app.js",
+    "generate-assets-if-changed": "bash -c 'export AST=public/app/assets; mv $AST{,.bak} && grunt concat && diff -q $AST{,.bak} && rm -r $AST && mv $AST{.bak,}; rm -fr $AST.bak'",
+    "package": "npm install && npm run generate-assets-if-changed && npm pack",
+    "postinstall": "[ ! -f ./node_modules/bower/bin/bower ] || node ./node_modules/bower/bin/bower install",
+    "start": "./node_modules/forever/bin/forever start -l forever.log --append -o app.log -e app.log app.js",
     "stop": "./node_modules/forever/bin/forever stop app.js"
   },
+  "files": [
+    "lib",
+    "public/app/assets",
+    "public/app/templates",
+    "public/app/index.html",
+    "app.js"
+  ],
   "devDependencies": {
     "adm-zip": "^0.4.4",
     "bower": "^1.3.1",
@@ -57,6 +68,13 @@
     "redis": "^0.11.0",
     "sockjs": "^0.3.9"
   },
+  "bundledDependencies": [
+    "cookie-session",
+    "express",
+    "forever",
+    "redis",
+    "sockjs"
+  ],
   "webdriverVersions": {
     "chromedriver": "2.9",
     "selenium": "2.40.0"
