@@ -22,13 +22,19 @@ Bootstrapped From Yearofmoo's AngularJS Seed: A starter AngularJS repository for
 
 ### Unit Testing
 
-#### Single run tests
-`grunt test:unit` 
+#### Single run client (karma) tests
+`grunt test:client`
 
-#### Auto watching tests
-`grunt autotest:unit`
+#### Auto watching client (karma) tests
+`grunt autotest:client`
 
-### End to End Testing (Protractor)
+#### Single run server tests
+`grunt test:server`
+
+#### Auto watching server tests
+`grunt autotest:server`
+
+### End to End Testing (WebDriverJS)
 
 #### Single run tests
 `grunt test:e2e` 
