@@ -10,24 +10,29 @@
   copy: src={{ local_infra_dir }}/{{ tchatter_app_archive_name }} dest={{ tchatter_app_docker_dir }}/{{ tchatter_app_archive_name }}
   register: archive_copy
 
-- name: create docker image
+- name: create docker image for tchatter-app
   command: docker build -t tchatter/tchatter-app {{ tchatter_app_docker_dir }}
   when: archive_copy.changed or dockerfile_copy.changed
-  register: image_create
+  register: image_creation
 
-- name: kill existing docker container
+# first kills in-container process to speedup container removal
+# ("state=absent" first attempts to "stop" it, which may take some time)
+- name: kill existing tchatter-app docker container
   docker: image=tchatter/tchatter-app name=tchatter-app state=killed
   ignore_errors: yes
-  when: image_create.changed or (force_new_app_container is defined and force_new_app_container == "yes")
+  when: image_creation.changed or (force_new_app_container is defined and force_new_app_container == "yes")
 
-- name: remove existing docker container
+- name: remove existing tchatter-app docker container
   docker: image=tchatter/tchatter-app name=tchatter-app state=absent
-  when: image_create.changed or (force_new_app_container is defined and force_new_app_container == "yes")
+  when: image_creation.changed or (force_new_app_container is defined and force_new_app_container == "yes")
 
-- name: create docker container from image
-  docker: image=tchatter/tchatter-app name=tchatter-app state=present detach=yes ports={{ tchatter_app_port }}:{{ tchatter_app_port }} links=redis-server:redis
-  when: image_create.changed or (force_new_app_container is defined and force_new_app_container == "yes")
+- set_fact: tchatter_app_port={{ tchatter_app_port_base + 1 }}
 
-- name: start docker container
-  # using same args than creation to ensure args used if creation did not occur (because image did not change but container is absent for whatever reason)
-  docker: image=tchatter/tchatter-app name=tchatter-app state=running detach=yes ports={{ tchatter_app_port }}:{{ tchatter_app_port }} links=redis-server:redis
+- name: create tchatter-app docker container from image
+  docker: image=tchatter/tchatter-app name=tchatter-app state=present detach=yes ports={{ tchatter_app_port }}:{{ tchatter_app_default_port }} links=redis-server:redis
+  when: image_creation.changed or (force_new_app_container is defined and force_new_app_container == "yes")
+
+- name: start tchatter-app docker container
+  # re-specify creation args to ensure they are used if creation did not occur
+  # (because for instance the image did not change but the container is absent for whatever reason)
+  docker: image=tchatter/tchatter-app name=tchatter-app state=running detach=yes ports={{ tchatter_app_port }}:{{ tchatter_app_default_port }} links=redis-server:redis

@@ -1,14 +1,16 @@
 var express = require('express'),
   path = require('path'),
   messageService = require('./lib/message'),
+  monitoring = require('./lib/monitoring'),
   session = require('./lib/session');
 
 var app = express(),
   server;
 
 app.configure(function() {
-  session.setup(app);
   app.use(express.bodyParser());
+  app.use(monitoring);
+  session.setup(app);
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public', 'app/')));
 });

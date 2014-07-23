@@ -1,0 +1,42 @@
+---
+- name: create haproxy infra work directory
+  file: path={{ haproxy_docker_dir }} state=directory
+
+- name: copy haproxy Dockerfile
+  template: src=Dockerfile.j2 dest={{ haproxy_docker_dir }}/Dockerfile
+  register: dockerfile_copy
+
+- name: copy haproxy configuration
+  template: src=haproxy.cfg.j2 dest={{ haproxy_docker_dir }}/haproxy.cfg
+  register: haproxy_cfg_copy
+
+- name: check whether a docker image already exists for haproxy
+  shell: docker images | grep tchatter/haproxy
+  ignore_errors: yes
+  register: haproxy_image_check
+
+- name: create docker image for haproxy
+  command: docker build -t tchatter/haproxy {{ haproxy_docker_dir }}
+  register: image_creation
+  when: haproxy_image_check|failed or dockerfile_copy.changed or haproxy_cfg_copy.changed
+
+# first kills in-container process to speedup container removal
+# ("state=absent" first attempts to "stop" it, which may take some time)
+- name: kill existing haproxy docker container
+  docker: image=tchatter/haproxy name=haproxy state=killed
+  ignore_errors: yes
+  when: image_creation.changed
+
+- name: remove existing haproxy docker container
+  docker: image=tchatter/haproxy name=haproxy state=absent
+  when: image_creation.changed
+
+- name: create haproxy docker container from image
+  docker: image=tchatter/haproxy name=haproxy state=present detach=yes ports={{ http_port }}:{{ http_port }}
+  when: image_creation.changed
+
+- name: start haproxy docker container
+  # re-specify creation args to ensure they are used if creation did not occur
+  # (because for instance the image did not change but the container is absent for whatever reason)
+  docker: image=tchatter/haproxy name=haproxy state=running detach=yes ports={{ http_port }}:{{ http_port }}
+

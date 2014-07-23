@@ -1,0 +1,7 @@
+FROM        ubuntu:14.04
+RUN         apt-get update
+RUN         apt-get --assume-yes install haproxy socat
+ADD         haproxy.cfg /etc/haproxy/haproxy.cfg
+VOLUME      /var/haproxy-run
+CMD         ["haproxy", "-f", "/etc/haproxy/haproxy.cfg"]
+EXPOSE      {{ http_port }}

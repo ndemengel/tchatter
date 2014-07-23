@@ -1,0 +1,2 @@
+---
+haproxy_docker_dir: '{{ tchatter_infra_work_dir }}/haproxy'
