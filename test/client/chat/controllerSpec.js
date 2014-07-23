@@ -5,7 +5,7 @@ describe('Chat Module', function() {
 
   beforeEach(inject(function($controller, $rootScope) {
     messageService = {
-      retrieveLastMessages: function noop() { },
+      retrieveLatestMessages: function noop() { },
       onMessage: function(cb) {
         this.subscriberRegisteredForNewMessages = true;
         this.messageListener = cb;

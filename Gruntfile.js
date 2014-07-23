@@ -1,3 +1,4 @@
+var childProcess = require('child_process');
 var testDriver = require('./test/e2e/util/test-context');
 
 process.on('SIGINT', function() {
@@ -165,6 +166,18 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-concurrent');
 
+  grunt.registerTask('vagrant:up', 'Start vagrant VM', function() {
+    var done = this.async();
+    var vagrantProcess = childProcess.spawn('vagrant', ['up']);
+    vagrantProcess.stdout.on('data', function(data) {
+      console.log(data.toString());
+    });
+    vagrantProcess.stderr.on('data', function(data) {
+      console.error(data.toString());
+    });
+    vagrantProcess.on('close', done);
+  });
+
   grunt.registerTask('selenium:standalone_start', 'Start a standalone Selenium server', function() {
     var done = this.async();
     testDriver.startSelenium(done);
@@ -178,13 +191,13 @@ module.exports = function(grunt) {
   //single run tests
   grunt.registerTask('test', ['jshint', 'test:server', 'test:client', 'test:e2e']);
   grunt.registerTask('test:client', ['karma:unit']);
-  grunt.registerTask('test:e2e', ['concat', 'selenium:standalone_start', 'mochaTest:e2e', 'selenium:standalone_stop']);
+  grunt.registerTask('test:e2e', ['vagrant:up', 'selenium:standalone_start', 'concat', 'mochaTest:e2e', 'selenium:standalone_stop']);
   grunt.registerTask('test:server', ['mochaTest:unit']);
 
   //autotest and watch tests
   grunt.registerTask('autotest', ['selenium:standalone_start', 'concurrent:watch_all_tests', 'selenium:standalone_stop']);
   grunt.registerTask('autotest:client', ['karma:unit_auto']);
-  grunt.registerTask('autotest:e2e', ['selenium:standalone_start', 'concurrent:watch_e2e', 'selenium:standalone_stop']);
+  grunt.registerTask('autotest:e2e', ['vagrant:up', 'selenium:standalone_start', 'concurrent:watch_e2e', 'selenium:standalone_stop']);
   grunt.registerTask('autotest:server', ['watch:mocha_unit']);
 
   //coverage testing

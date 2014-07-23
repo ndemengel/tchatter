@@ -30,7 +30,7 @@ angular.module('app.chat.controller', ['app.chat.service'])
       });
     }
 
-    messageService.retrieveLastMessages(addToHistory);
+    messageService.retrieveLatestMessages(addToHistory);
 
     messageService.onMessage(addToHistory);
   }]);

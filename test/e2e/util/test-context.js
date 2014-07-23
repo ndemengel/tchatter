@@ -104,6 +104,48 @@ function quitDriver() {
   return webdriver.promise.fulfilled();
 }
 
+
+function runAnsiblePlay(name) {
+  var deferred = webdriver.promise.defer();
+  var npmOptions = { cwd: path.join(__dirname, '..', '..', '..', 'infra') };
+
+  var ansibleProcess = childProcess.spawn('ansible-playbook', ['-i', 'inventories/dev', name], npmOptions);
+
+  ansibleProcess.stderr.on('data', function(data) {
+    console.error('server: ' + data);
+  });
+
+  ansibleProcess.on('close', function(code) {
+    if (code === 0) {
+      deferred.fulfill();
+    }
+    else {
+      console.error('ansible exit code: ' + code);
+      deferred.reject();
+    }
+  });
+
+  return deferred.promise;
+}
+
+/**
+ * Start the redis server. Should usually be called before each test.
+ *
+ * @returns {Promise}
+ */
+function startRedis() {
+  return runAnsiblePlay('redis-server.yml');
+}
+
+/**
+ * Stop the redis server. Should usually be called after each test.
+ *
+ * @returns {Promise}
+ */
+function stopRedis() {
+  return runAnsiblePlay('stop-redis-server.yml');
+}
+
 /**
  * Start the application. Should usually be called before each test.
  *
@@ -130,7 +172,7 @@ function startApp(maybePort) {
 
   appServerProcess.stderr.on('data', function(data) {
     // ignore connect's warning
-    if (!/connect.3\.0/i.test(data)) {
+    if (!/deprecated/i.test(data)) {
       console.error('server: ' + data);
     }
   });
@@ -160,7 +202,8 @@ function stopApp() {
  */
 function setUpTest(done) {
   this.timeout(10000);
-  startApp()
+  startRedis()
+    .then(startApp)
     .then(buildDrivers)
     .then(done)
     .thenCatch(stopApp);
@@ -181,6 +224,7 @@ function tearDownTest(done) {
   this.timeout(10000);
   quitDriver()
     .then(stopApp)
+    .then(stopRedis)
     .then(done);
 }
 

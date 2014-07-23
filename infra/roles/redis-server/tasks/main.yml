@@ -14,5 +14,5 @@
   command: docker build -t tchatter/redis-server {{ redis_server_docker_dir }}
   when: redis_image_check|failed
 
-- name: launch docker image
+- name: create/start docker container from image
   docker: image=tchatter/redis-server name=redis-server state=running ports={{ redis_server_port }}:{{ redis_server_port }}

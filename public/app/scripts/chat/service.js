@@ -16,12 +16,8 @@ angular.module('app.chat.service', ['app.chat.transport'])
         });
     }
 
-    function getMessagesSince(afterId, cb) {
-      handleResponse($http.get('/msg?afterId=' + afterId), cb);
-    }
-
-    function retrieveLastMessages(cb) {
-      getMessagesSince(0, function(success, messages) {
+    function retrieveLatestMessages(cb) {
+      handleResponse($http.get('/msg'), function(success, messages) {
         if (!success || messages.length === 0) {
           return;
         }
@@ -46,7 +42,7 @@ angular.module('app.chat.service', ['app.chat.transport'])
 
     return {
       postMessage: postMessage,
-      retrieveLastMessages: retrieveLastMessages,
+      retrieveLatestMessages: retrieveLatestMessages,
       onMessage: onMessage
     };
   }]);

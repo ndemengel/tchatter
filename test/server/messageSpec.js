@@ -10,10 +10,26 @@ chai.use(require('sinon-chai'));
 describe('Message Service', function() {
 
   var messageService;
+  var mockStorage;
 
   beforeEach(function() {
+    mockStorage = {
+      messages: [],
+      messageListeners: [],
+      publish: function(message) {
+        this.messages.push(message);
+        this.messageListeners.forEach(function(listener) {
+          listener(message);
+        });
+      },
+      onMessage: function(cb) {
+        this.messageListeners.push(cb);
+      },
+      fetchLatestMessages: function(cb) {cb(this.messages);}
+    };
+
     messageService = proxyquire('../../lib/message', {
-      './db': { messages: [] }
+      './storage': mockStorage
     });
   });
 
@@ -41,12 +57,8 @@ describe('Message Service', function() {
       return httpMocks.createRequest({ body: body });
     }
 
-    function requestWithParams(params) {
-      var request = httpMocks.createRequest({ params: params });
-      request.param = function(key, defaultVal) {
-        return this.params[key] || defaultVal;
-      };
-      return request;
+    function request() {
+      return httpMocks.createRequest();
     }
 
     function postMessage(msg) {
@@ -72,7 +84,7 @@ describe('Message Service', function() {
       expectJson({ success: true });
     });
 
-    it('should only return messages received after requested id', function() {
+    it('should return latest messages', function() {
       // given existing messages
       postMessage('Message 1');
       postMessage('Message 2');
@@ -80,16 +92,15 @@ describe('Message Service', function() {
       resetMockResponse();
 
       // when querying messages
-      var request = requestWithParams({ afterId: 0 });
-      messageService.getLastMessagesSince(request, response);
+      messageService.getLatestMessages(request(), response);
 
       // then
       expectJson();
-      var firstMessages = getJsonData();
-      expect(firstMessages).to.have.length(3);
-      expect(firstMessages[0].msg).to.equal('Message 1');
-      expect(firstMessages[1].msg).to.equal('Message 2');
-      expect(firstMessages[2].msg).to.equal('Message 3');
+      var messages = getJsonData();
+      expect(messages).to.have.length(3);
+      expect(messages[0].msg).to.equal('Message 1');
+      expect(messages[1].msg).to.equal('Message 2');
+      expect(messages[2].msg).to.equal('Message 3');
 
       // given some new messages
       postMessage('Message 4');
@@ -97,15 +108,17 @@ describe('Message Service', function() {
 
       // when querying new messages
       resetMockResponse();
-      request = requestWithParams({ afterId: firstMessages[2].id });
-      messageService.getLastMessagesSince(request, response);
+      messageService.getLatestMessages(request(), response);
 
       // then
       expectJson();
-      var newMessages = getJsonData();
-      expect(newMessages).to.have.length(2);
-      expect(newMessages[0].msg).to.equal('Message 4');
-      expect(newMessages[1].msg).to.equal('Message 5');
+      messages = getJsonData();
+      expect(messages).to.have.length(5);
+      expect(messages[0].msg).to.equal('Message 1');
+      expect(messages[1].msg).to.equal('Message 2');
+      expect(messages[2].msg).to.equal('Message 3');
+      expect(messages[3].msg).to.equal('Message 4');
+      expect(messages[4].msg).to.equal('Message 5');
     });
 
     it('should return all messages when no id is given', function() {
@@ -115,8 +128,7 @@ describe('Message Service', function() {
       resetMockResponse();
 
       // when querying messages without time
-      var request = requestWithParams();
-      messageService.getLastMessagesSince(request, response);
+      messageService.getLatestMessages(request(), response);
 
       // then
       expectJson();
@@ -160,7 +172,22 @@ describe('Message Service', function() {
 
       // then
       expect(connection.write).to.have.been.calledWithMatch(
-        jsonContaining({ id: 1, msg: "Welcome Mr somecolor", type: "userState"}));
+        jsonContaining({ id: 1, msg: 'Welcome Mr somecolor', type: 'userState'}));
+    });
+
+    it('should forward messages from other users', function() {
+      // given a user is connected
+      var socket = mockSocket();
+      var connection = mockConnection('id1', 'somecolor');
+      messageService.listenToSocket(socket);
+      socket.emit('connection', connection);
+
+      // when
+      var message = { id: 1, msg: 'Hello world', type: 'userMessage', sender: 'blue'};
+      mockStorage.publish(message);
+
+      // then
+      expect(connection.write).to.have.been.calledWithMatch(jsonContaining(message));
     });
   });
 });

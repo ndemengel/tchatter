@@ -49,15 +49,15 @@ describe('Message Service', function() {
     expect($mockTransport.lastSentMessage).to.equal('Hello world');
   });
 
-  it('should retrieve last messages', inject(function($httpBackend) {
+  it('should retrieve latest messages', inject(function($httpBackend) {
     // given
-    $httpBackend.expectGET('/msg?afterId=0')
+    $httpBackend.expectGET('/msg')
       .respond(200, '[{"msg": "message 1", "id": 23, "time": 975}, {"msg": "message 2", "id": 42, "time": 1257}]');
 
     var callback = sinon.spy();
 
     // when
-    messageService.retrieveLastMessages(callback);
+    messageService.retrieveLatestMessages(callback);
 
     // then
     $httpBackend.flush();
