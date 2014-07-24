@@ -134,7 +134,7 @@ function runAnsiblePlay(name) {
  * @returns {Promise}
  */
 function startRedis() {
-  return runAnsiblePlay('redis-server.yml');
+  return runAnsiblePlay('start-test-redis-server.yml');
 }
 
 /**
@@ -143,7 +143,7 @@ function startRedis() {
  * @returns {Promise}
  */
 function stopRedis() {
-  return runAnsiblePlay('stop-redis-server.yml');
+  return runAnsiblePlay('stop-test-redis-server.yml');
 }
 
 /**

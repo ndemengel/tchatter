@@ -1,0 +1,4 @@
+---
+- hosts: docker-host
+  roles:
+    - { role: redis-server, container_name: test-redis-server, container_port: 6780 }
