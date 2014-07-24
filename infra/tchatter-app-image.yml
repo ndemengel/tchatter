@@ -1,4 +1,4 @@
 ---
 - hosts: docker-host
   roles:
-    - haproxy
+    - tchatter-app-image

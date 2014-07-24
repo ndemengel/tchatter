@@ -1,0 +1,20 @@
+---
+- name: create tchatter infra work directory
+  file: path={{ tchatter_app_docker_dir }} state=directory
+
+- name: copy tchatter-app Dockerfile
+  template: src=Dockerfile.j2 dest={{ tchatter_app_docker_dir }}/Dockerfile
+  register: dockerfile_copy
+
+- name: copy tchatter-app archive
+  copy: src={{ local_infra_dir }}/{{ tchatter_app_archive_name }} dest={{ tchatter_app_docker_dir }}/{{ tchatter_app_archive_name }}
+  register: archive_copy
+
+- name: create docker image for tchatter-app
+  command: docker build -t tchatter/tchatter-app {{ tchatter_app_docker_dir }}
+  when: archive_copy.changed or dockerfile_copy.changed
+  register: image_creation
+
+- name: register whether a new tchatter-app image has been created for future use
+  file: path={{ tchatter_app_image_creation_marker_file }} state=touch
+  when: image_creation.changed

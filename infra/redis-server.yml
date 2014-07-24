@@ -1,4 +1,4 @@
 ---
-- hosts: docker-hosts
+- hosts: docker-host
   roles:
     - redis-server

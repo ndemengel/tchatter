@@ -1,9 +1,12 @@
+---
 docker_host_project_dir: '/vagrant'
 http_port: 80
 local_infra_dir: '{{ inventory_dir }}/..'
 local_project_dir: '{{ local_infra_dir }}/..'
 redis_server_port: 6379
 tchatter_app_default_port: 8080
+# TODO generate a name to prevent conflicts (current time?)
+tchatter_app_image_creation_marker_file: /tmp/tchatter-app-image-created
 tchatter_app_port_base: 8080
 tchatter_app_archive_name: 'tchatter.tar.gz'
 tchatter_infra_work_dir: /var/lib/tchatter/infra

@@ -1,5 +1,5 @@
 ---
-- hosts: docker-hosts
+- hosts: docker-host
   tasks:
     - name: stop docker container
       docker: name=redis-server image=tchatter/redis-server state=stopped

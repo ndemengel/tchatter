@@ -1,0 +1,52 @@
+---
+- hosts: app-nodes
+  gather_facts: no
+  serial: 1
+
+  pre_tasks:
+    - name: 'remove app node from haproxy pool (http + websocket)'
+      shell: 'echo "disable server {{ item }}"
+          | docker run -i -t --volumes-from=haproxy tchatter/haproxy socat /var/haproxy-run/haproxy.sock stdio'
+      with_items:
+        - bk_static/srv_web_{{ inventory_hostname }}
+        - bk_websocket/srv_ws_{{ inventory_hostname }}
+      delegate_to: docker-host
+
+  tasks:
+    - name: detect whether a new tchatter-app image has just been created
+      command: test -f {{ tchatter_app_image_creation_marker_file }}
+      register: image_creation_check
+      ignore_errors: yes
+      delegate_to: docker-host
+ 
+    # first kills in-container process to speedup container removal
+    # ("state=absent" first attempts to "stop" it, which may take some time)
+    - name: kill existing tchatter-app docker container
+      docker: image=tchatter/tchatter-app name={{ inventory_hostname }} state=killed
+      ignore_errors: yes
+      when: image_creation_check|success or (force_new_app_container is defined and force_new_app_container == "yes")
+      delegate_to: docker-host
+ 
+    - name: remove existing tchatter-app docker container
+      docker: image=tchatter/tchatter-app name={{ inventory_hostname }} state=absent
+      when: image_creation_check|success or (force_new_app_container is defined and force_new_app_container == "yes")
+      delegate_to: docker-host
+ 
+    - name: create/start tchatter-app docker container from image
+      docker: image=tchatter/tchatter-app name={{ inventory_hostname }} state=running detach=yes ports={{ node_app_port }}:{{ tchatter_app_default_port }} links=redis-server:redis
+      delegate_to: docker-host
+
+  post_tasks:
+    - name: 'put app node into haproxy pool (http + websocket)'
+      shell: 'echo "enable server {{ item }}"
+          | docker run -i -t --volumes-from=haproxy tchatter/haproxy socat /var/haproxy-run/haproxy.sock stdio'
+      with_items:
+        - bk_static/srv_web_{{ inventory_hostname }}
+        - bk_websocket/srv_ws_{{ inventory_hostname }}
+      delegate_to: docker-host
+
+
+- hosts: docker-host
+  tasks:
+    - name: remove image creation marker file
+      file: path={{ tchatter_app_image_creation_marker_file }} state=absent

@@ -5,6 +5,10 @@
 .settings
 .vagrant
 *.log
+*.tar
+*.tar.bz2
+*.tar.gz
+*.tgz
 node_modules
 bower_components
 /selenium

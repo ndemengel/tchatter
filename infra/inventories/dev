@@ -1,2 +1,6 @@
-[docker-hosts]
-vagrant-vm  ansible_ssh_host=localhost   ansible_ssh_port=2222   ansible_ssh_user=root
+docker-host  ansible_ssh_host=localhost   ansible_ssh_port=2222   ansible_ssh_user=root
+vagrant-vm   ansible_ssh_host=localhost   ansible_ssh_port=2222   ansible_ssh_user=root
+
+[app-nodes]
+app-node1    node_app_port=8081
+app-node2    node_app_port=8082

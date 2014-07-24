@@ -42,14 +42,16 @@ backend bk_websocket
     # one-level deep, like "/echo").
     balance uri depth 2
     timeout server 120s
-    server srv_ws_node1 {{ ansible_docker0['ipv4']['address'] }}:8081 maxconn 200 weight 10 cookie srv_ws_node1 check
-    server srv_ws_node2 {{ ansible_docker0['ipv4']['address'] }}:8082 maxconn 200 weight 10 cookie srv_ws_node2 check
+  {% for node in groups['app-nodes'] %}
+    server srv_ws_{{ node }} {{ ansible_docker0.ipv4.address }}:{{ hostvars[node].node_app_port }} maxconn 200 weight 10 cookie srv_ws_node1 check
+  {% endfor %}
 
 backend bk_static
     balance roundrobin
     option httpchk HEAD /health
-    server srv_web_node1 {{ ansible_docker0['ipv4']['address'] }}:8081 maxconn 100 weight 10 cookie srv_web_node1 check
-    server srv_web_node2 {{ ansible_docker0['ipv4']['address'] }}:8082 maxconn 100 weight 10 cookie srv_web_node2 check
+  {% for node in groups['app-nodes'] %}
+    server srv_web_{{ node }} {{ ansible_docker0.ipv4.address }}:{{ hostvars[node].node_app_port }} maxconn 100 weight 10 cookie srv_web_node1 check
+  {% endfor %}
 
 backend bk_stats
     stats uri /stats

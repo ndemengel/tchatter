@@ -1,0 +1,5 @@
+---
+- include: redis-server.yml
+- include: tchatter-app-image.yml
+- include: haproxy.yml
+- include: tchatter-app-nodes.yml
