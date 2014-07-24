@@ -8,15 +8,25 @@ angular.module('app.chat.transport', [])
 
     var messageListeners = [];
 
-    var sock = new SockJS(window.location.origin + '/chat', undefined, {
-      server: window.Tchatter.COLOR
-    });
+    var sock;
 
-    sock.onmessage = function(e) {
-      messageListeners.forEach(function(fn) {
-        fn(e);
+    function openSocket() {
+      sock = new SockJS(window.location.origin + '/chat', undefined, {
+        server: window.Tchatter.COLOR
       });
-    };
+
+      sock.onmessage = function(e) {
+        messageListeners.forEach(function(fn) {
+          fn(e);
+        });
+      };
+
+      sock.onclose = function() {
+        openSocket();
+      };
+    }
+
+    openSocket();
 
     return {
       onMessage: function(fn) {
