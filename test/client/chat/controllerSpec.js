@@ -16,6 +16,7 @@ describe('Chat Module', function() {
       messageReceived: function(msg) {
         this.messageListener(msg);
       }
+
     };
 
     $mockTimeout = {
@@ -26,6 +27,8 @@ describe('Chat Module', function() {
         this.func.call(undefined);
       }
     };
+
+    window.Tchatter = {COLOR: 'somecolor'};
 
     $controller('ChatCtrl', {
       messageService: messageService,

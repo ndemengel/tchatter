@@ -174,7 +174,7 @@ describe('Message Service', function() {
 
       // then
       expect(connection.write).to.have.been.calledWithMatch(
-        jsonContaining({ id: 1, msg: 'Welcome Mr somecolor', type: 'userState'}));
+        jsonContaining({ event: 'welcome', type: 'userState', user: 'somecolor'}));
     });
 
     it('should forward messages from other users', function() {
@@ -185,7 +185,7 @@ describe('Message Service', function() {
       socket.emit('connection', connection);
 
       // when
-      var message = { id: 1, msg: 'Hello world', type: 'userMessage', sender: 'blue'};
+      var message = { msg: 'Hello world', type: 'userMessage', user: 'blue'};
       mockStorage.publish(message);
 
       // then

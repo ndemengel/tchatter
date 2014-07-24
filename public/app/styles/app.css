@@ -1,0 +1,5 @@
+#message-history {
+    background-color: white;
+    height: 400px;
+    overflow-y: scroll;
+}

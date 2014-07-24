@@ -53,7 +53,7 @@ describe('Chat Page', function() {
 
     // then
     return expect(appDriver().getHistoryContent()).to.eventually
-      .satisfy(endsWith(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE));
+      .satisfy(endsWith('You : ' + FIRST_USER_MESSAGE + '\nYou : ' + SECOND_USER_MESSAGE));
   }));
 
   it('should display already existing messages', ctx.e2eTest(function() {
@@ -73,7 +73,7 @@ describe('Chat Page', function() {
 
     // then
     return expect(newAppDriver.getHistoryContent()).to.eventually
-      .contain(FIRST_USER_MESSAGE + '\n' + SECOND_USER_MESSAGE);
+      .contain('Mr pink : ' + FIRST_USER_MESSAGE + '\nMr pink : ' + SECOND_USER_MESSAGE);
   }));
 
 });

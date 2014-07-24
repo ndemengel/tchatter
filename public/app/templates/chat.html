@@ -1,8 +1,20 @@
-<p id="instructions">{{ welcomeMessage }}</p>
-<div id="message-history">
- <p ng-repeat="msg in userMessages">{{ msg.msg }}</p>
+<div ng-style="{{bodyStyle}}">
+    <p id="instructions">{{ welcomeMessage }}</p>
+    <div id="message-history">
+        <p ng-repeat="msg in userMessages">
+            <span ng-show="(msg.type == 'userMessage' || msg.event != 'welcome') && msg.user != '{{ userColor }}'" style="color: {{ msg.user }};">Mr {{ msg.user }}</span>
+            <span ng-show="(msg.type == 'userMessage' || msg.event != 'welcome') && msg.user == '{{ userColor }}'" style="color: {{ msg.user }};">You</span>
+            <span ng-show="msg.type == 'userMessage'"> : {{ msg.msg }}</span>
+            <span ng-show="msg.type == 'userState' && msg.event == 'welcome'">Welcome  </span>
+            <span ng-show="msg.type == 'userState' && msg.event == 'welcome'" style="color: {{ msg.user }};">Mr {{ msg.user }}</span>
+            <span ng-show="msg.type == 'userState' && msg.event == 'enter' && msg.user != '{{ userColor }}'"> has entered</span>
+            <span ng-show="msg.type == 'userState' && msg.event == 'enter' && msg.user == '{{ userColor }}'"> have entered</span>
+            <span ng-show="msg.type == 'userState' && msg.event == 'left' && msg.user != '{{ userColor }}'"> has left</span>
+            <span ng-show="msg.type == 'userState' && msg.event == 'left' && msg.user == '{{ userColor }}'"> have left</span>
+        </p>
+    </div>
+    <form ng-submit="submitMessage()">
+        <label for="message-input">Type your message:</label><input id="message-input" ng-model="newMessage">
+        <button type="submit">Send</button>
+    </form>
 </div>
-<form ng-submit="submitMessage()">
-<label for="message-input">Type your message:</label><input id="message-input" ng-model="newMessage">
-<button type="submit">Send</button>
-</form>
