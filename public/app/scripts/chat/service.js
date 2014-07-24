@@ -2,6 +2,14 @@ angular.module('app.chat.service', ['app.chat.transport'])
 
   .factory('messageService', ['$http', '$timeout', 'transport', function($http, $timeout, transport) {
 
+    transport.onConnect(function() {
+      console.log('transport OK');
+    });
+
+    transport.onDisconnect(function() {
+      console.log('transport KO');
+    });
+
     function handleResponse(promise, cb) {
       promise
         .success(function(data) {

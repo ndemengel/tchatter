@@ -16,6 +16,8 @@ describe('Message Service', function() {
     };
 
     $mockTransport = {
+      onConnect: function() {},
+      onDisconnect: function() {},
       onMessage: function(cb) {
         this.messagesListeners = this.messagesListeners || [];
         this.messagesListeners.push(cb);
