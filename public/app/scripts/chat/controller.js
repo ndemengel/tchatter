@@ -1,4 +1,4 @@
-angular.module('app.chat.controller', ['app.chat.service'])
+angular.module('app.chat.controller', ['app.chat.service', 'app.chat.scenario'])
 
   .factory('welcomeMessage', function() {
     return function() {
@@ -7,14 +7,18 @@ angular.module('app.chat.controller', ['app.chat.service'])
   })
 
   .controller('ChatCtrl',
-      ['$scope', '$timeout', 'messageService', 'welcomeMessage',
-        function($scope, $timeout, messageService, welcomeMessage) {
+      ['$scope', '$timeout', 'messageService', 'welcomeMessage', 'scenario',
+        function($scope, $timeout, messageService, welcomeMessage, scenario) {
 
     $scope.userMessages = [];
     $scope.welcomeMessage = welcomeMessage();
 
     $scope.bodyStyle = {'background-color': window.Tchatter.COLOR};
     $scope.userColor = window.Tchatter.COLOR;
+
+    $scope.refreshValue = function hackToForceModelUpdate() {
+      console.log($scope.newMessage);
+    };
 
     $scope.submitMessage = function submitMessage() {
       var msgContent = $scope.newMessage;
@@ -30,7 +34,6 @@ angular.module('app.chat.controller', ['app.chat.service'])
     };
 
     function addToHistory(message) {
-      console.log(message);
       $scope.$apply(function() {
         $scope.userMessages.push(message);
         scrollHistoryToBottomOnNewMessage();
@@ -46,6 +49,8 @@ angular.module('app.chat.controller', ['app.chat.service'])
         }
       });
     }
+
+    scenario.init($scope);
 
     messageService.retrieveLatestMessages(addToHistory);
 
