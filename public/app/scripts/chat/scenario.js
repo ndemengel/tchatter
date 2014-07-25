@@ -395,7 +395,7 @@ angular.module('app.chat.scenario', ['app.chat.transport'])
         return null;
       }
 
-      function postMessage(msg) {
+      function postMessage(msg, cb) {
 
         setTimeout(function() {
           $scope.newMessage = msg;
@@ -407,23 +407,27 @@ angular.module('app.chat.scenario', ['app.chat.transport'])
 
               if (index == msg.length - 1) {
                 setTimeout(function() {
-                  $scope.submitMessage();
+                  $scope.$apply(function() {
+                    $scope.submitMessage();
+                  });
                   input.value = '';
-                }, 500);
+                  cb();
+                }, 200);
               }
-            }, i * 25);
+            }, i * 20);
             })(i);
           }
 
-        }, 500);
+        }, 200);
       }
 
 
       var postIfUserHasNextMessage = function(message) {
         var nextMessage = getNextMessage(message);
         if (nextMessage && window.Tchatter.COLOR === nextMessage.user) {
-          postMessage(nextMessage.msg);
-          postIfUserHasNextMessage(nextMessage.msg);
+          postMessage(nextMessage.msg, function() {
+            postIfUserHasNextMessage({ data: JSON.stringify(nextMessage)});
+          });
         }
       }
       transport.onMessage(postIfUserHasNextMessage);
