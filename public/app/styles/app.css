@@ -1,5 +1,125 @@
+body {
+  margin: 0;
+  font-size: 1.2em;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#view-container {
+  position: relative;
+}
+
+#view-container header {
+  height: 2em;
+  padding-left: .5em;
+  padding-top: .5em;
+  padding-bottom: .5em;
+}
+
+.scrollable-content-container {
+  position: fixed;
+  top: 2em;
+  bottom: 2em;
+  width: 100%;
+}
+
 #message-history {
-    background-color: white;
-    height: 400px;
-    overflow-y: scroll;
+  background-color: white;
+  color: black;
+  height: 100%;
+  overflow-y: scroll;
+  margin: auto;
+}
+
+#message-history:before {
+  position: fixed;
+  top: 2em;
+  height: 2em;
+  width: 100%;
+  content: ' ';
+  background: -moz-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -webkit-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -o-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -ms-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  z-index: 2;
+}
+
+#message-history:after {
+  position: fixed;
+  bottom: 2em;
+  height: 2em;
+  width: 100%;
+  content: ' ';
+  background: -moz-linear-gradient(bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -webkit-linear-gradient(bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -o-linear-gradient(bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -ms-linear-gradient(bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  z-index: 2;
+}
+
+#message-history p {
+  padding-left: .5em;
+}
+
+#view-container footer {
+  background-color: inherit;
+  position: fixed;
+  bottom: 0;
+  height: 1.5em;
+  width: 100%;
+  padding-left: .5em;
+  padding-top: .5em;
+}
+
+#view-container form label {
+  margin-right: .5em;
+}
+
+.theme-blonde {
+  background-color: lightyellow;
+  color: dimgrey;
+}
+.user-blonde {
+  color: yellow;
+}
+
+.theme-blue {
+  background-color: royalblue;
+  color: white;
+}
+.user-blue {
+  color: royalblue;
+}
+
+.theme-brown {
+  background-color: saddlebrown;
+  color: white;
+}
+.user-brown {
+  color: saddlebrown;
+}
+
+.theme-pink {
+  background-color: pink;
+  color: white;
+}
+.user-pink {
+  color: pink;
+}
+
+.theme-orange {
+  background-color: darkorange;
+  color: white;
+}
+.user-orange {
+  color: darkorange;
+}
+
+.theme-white {
+  background-color: white;
+  color: dimgrey;
+}
+.user-white {
+  color: dimgrey;
 }

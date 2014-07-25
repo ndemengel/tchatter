@@ -13,7 +13,8 @@ angular.module('app.chat.controller', ['app.chat.service', 'app.chat.scenario'])
     $scope.userMessages = [];
     $scope.welcomeMessage = welcomeMessage();
 
-    $scope.bodyStyle = {'background-color': window.Tchatter.COLOR};
+    $scope.themeClass = 'theme-' + window.Tchatter.COLOR;
+    $scope.userClass = 'user-' + window.Tchatter.COLOR;
     $scope.userColor = window.Tchatter.COLOR;
 
     $scope.refreshValue = function hackToForceModelUpdate() {
