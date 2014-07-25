@@ -2,7 +2,7 @@ angular.module('app.chat.controller', ['app.chat.service', 'app.chat.scenario'])
 
   .factory('welcomeMessage', function() {
     return function() {
-      return 'Welcome to Tchatter...';
+      return 'Welcome to Tchatter';
     };
   })
 
@@ -55,5 +55,13 @@ angular.module('app.chat.controller', ['app.chat.service', 'app.chat.scenario'])
 
     messageService.retrieveLatestMessages(addToHistory);
 
-    messageService.onMessage(addToHistory);
+    messageService.onMessage(function(message) {
+      if (message.version) {
+        var appVersionContainer = document.getElementById('app-version');
+        if (appVersionContainer) {
+          appVersionContainer.innerHTML = message.version;
+        }
+      }
+      addToHistory(message);
+    });
   }]);

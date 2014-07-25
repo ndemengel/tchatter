@@ -77,11 +77,11 @@ body {
 }
 
 .theme-blonde {
-  background-color: lightyellow;
+  background-color: yellow;
   color: dimgrey;
 }
 .user-blonde {
-  color: yellow;
+  color: yellowgreen;
 }
 
 .theme-blue {
@@ -117,7 +117,7 @@ body {
 }
 
 .theme-white {
-  background-color: white;
+  background-color: lightgrey;
   color: dimgrey;
 }
 .user-white {
