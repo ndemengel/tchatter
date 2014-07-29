@@ -1,4 +1,4 @@
 ---
 - hosts: docker-host
   roles:
-    - { role: redis-server, container_name: redis-server, container_port: 6379 }
+    - { role: redis-server, container_name: redis-server, container_port: '{{ redis_server_port }}' }
