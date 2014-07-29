@@ -139,6 +139,9 @@ module.exports = function(grunt) {
     open: {
       app: {
         path: 'http://localhost:8080'
+      },
+      coverage: {
+        path: 'http://localhost:5555'
       }
     },
 
@@ -159,7 +162,7 @@ module.exports = function(grunt) {
         singleRun: true,
         reporters: ['progress', 'coverage'],
         preprocessors: {
-          'public/app/scripts/*.js': ['coverage']
+          'public/app/scripts/**/*.js': ['coverage']
         },
         coverageReporter: {
           type: 'html',
@@ -195,7 +198,7 @@ module.exports = function(grunt) {
 
   //coverage testing
   grunt.registerTask('test:coverage', ['karma:unit_coverage']);
-  grunt.registerTask('coverage', ['karma:unit_coverage', 'open:coverage', 'connect:coverage']);
+  grunt.registerTask('coverage:client', ['karma:unit_coverage', 'open:coverage', 'connect:coverage']);
 
   //installation-related
   grunt.registerTask('install', ['shell:npm_install', 'shell:selenium_install']);
