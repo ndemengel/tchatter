@@ -16,3 +16,6 @@
 
 - name: create/start docker container from image
   docker: image=tchatter/redis-server name={{ container_name }} state=running ports={{ container_port }}:{{ redis_server_port }}
+
+- name: wait for redis to be up
+  wait_for: port={{ container_port }}

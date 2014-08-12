@@ -156,7 +156,13 @@ function stopRedis() {
  */
 function startApp(maybePort) {
   var deferred = webdriver.promise.defer();
-  var npmOptions = { cwd: path.join(__dirname, '..', '..', '..') };
+  var npmOptions = {
+    cwd: path.join(__dirname, '..', '..', '..'),
+    env: {
+      PATH: process.env.PATH,
+      REDIS_PORT: '6380'
+    }
+  };
 
   appServerProcess = childProcess.spawn('node', ['app.js', maybePort || 9999], npmOptions);
 

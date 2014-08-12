@@ -22,13 +22,6 @@ describe('Chat Page', function() {
     };
   }
 
-  it('should welcome the user', ctx.e2eTest(function() {
-    // when
-    appDriver().openApp();
-    // then
-    return expect(appDriver().getViewText()).to.eventually.equal('Welcome to Tchatter...');
-  }));
-
   it('should display entered message in chat history', ctx.e2eTest(function() {
     // given
     appDriver().openApp();
@@ -73,7 +66,7 @@ describe('Chat Page', function() {
 
     // then
     return expect(newAppDriver.getHistoryContent()).to.eventually
-      .contain('Mr pink : ' + FIRST_USER_MESSAGE + '\nMr pink : ' + SECOND_USER_MESSAGE);
+      .contain('Mr blonde : ' + FIRST_USER_MESSAGE + '\nMr blonde : ' + SECOND_USER_MESSAGE);
   }));
 
 });
