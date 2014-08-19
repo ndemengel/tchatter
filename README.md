@@ -10,7 +10,7 @@ This project is two things:
 ### Web application
 
 A simple chat application built with [Nodejs](http://nodejs.org/)/Express, [Angular](https://angularjs.org/), SockJS, Mocha, Chai, WebDriverJS, [Redis](http://redis.io/)...
-Bootstrapped From Yearofmoo's AngularJS Seed: A starter AngularJS repository for getting started with AngularJS.
+Bootstrapped from [Yearofmoo's AngularJS Seed](https://github.com/yearofmoo/angularjs-seed-repo): A starter AngularJS repository for getting started with AngularJS.
 
 Everything has been coded with several tests first, at least one test by "layer" concerned (server, client) and one end-to-end test.
 This process was a bit dumb (some things were tested several times) on purpose, to force us in using all tools we wanted to discover (namely: Grunt, Karma and Protractor).
@@ -18,16 +18,16 @@ This process was a bit dumb (some things were tested several times) on purpose, 
 
 ### Cloud-like infrastructure
 
-The goal is to allow deploying web application updates without service interruption.
+The goal is to allow deploying web application updates without service interruption (not yet fully achieved, see [Note](#note) below).
 
 The main components are:
 
 - [HAProxy](http://www.haproxy.org): Front proxy allowing loadbalancing
-- Our webapp application tchatter running on Nodejs
+- Our web application tchatter running on Nodejs
 - [Redis](http://redis.io/): a key-value store, with publish/subscribe capabilities, allowing several app instances to share messages
 
 Each component is embedded in a [Docker](www.docker.com) container.
-To run Docker containers, easily, and independently of the user computer, a Virtualbox VM is run with Vagrant, based on Ubuntu 14.04
+To run Docker containers, easily, and independently to the user computer, a Virtualbox VM is run with Vagrant, based on Ubuntu 14.04
 
 As shown in the following architecture diagram, the HAProxy container is connected to N webapp containers, which are connected to a single redis container.
 
@@ -59,7 +59,10 @@ Install Redis or use the Redis container provided by the infrastructure part
 ### Testing
 
 #### Run all tests with
-`grunt test` 
+`grunt test`
+
+#### Auto watching all tests
+`grunt autotest` Run tests automatically when files change
 
 #### Unit Testing
 
@@ -141,9 +144,28 @@ npm run deploy
 
 7. You should see application version in browser window change from 1 to 2 (if you choose 2 as new version). The discussion still goes on, as service was not interrupted
 
-
-Note: TODO explain non-interruption not working perfectly
+<a name="note"></a>
+Note:
+As previously mentioned, there is still a service interruption.
+On service restart, there is a disconnection/reconnection for each browser client (the websocket is recreated):
+- the client displays that inadequate information because the disconnection event comes from the server, not the client
+- all messages sent by other clients meanwhile are lost for the disconnected client. Upon reconnection, the client should ask for the missing messages.
 
 ## Feedback
 
-TODO...
+**Angular**: Our web app is not complex enough to have a clear opinion. The double databinding is quite spectacular, but comes at a price: we lost control of the view part,
+which can be regained at an expensive cost (directives).
+
+**Protractor**: Can launch many browsers, but only works for angular applications. Besides, it instruments the application, thus changing our tests to white box mode
+(for instance, it refuses to launch tests while there is a "setInterval" activity). Instead, we directly used WebDriverJS.
+
+**SockJS**: cool stuff :)
+
+**Grunt**: nice tool!
+
+**Docker**: Remember, a container is a process, not a VM! For instance, it is of no use to "ssh" into a container.
+
+**Ansible**: rolling updates mechanism is not applicable to docker containers. Ansible allows to loop on hosts,
+but containers are not regular hosts (because of the previous point). Our solution [here](infra/tchatter-app-nodes.yml).
+
+**Redis**: messages seem lost if there is no consumer
