@@ -1,5 +1,24 @@
 # Tchatter
 
+## Table of Contents
+- [Presentation](#presentation)
+    - [Web application](#pres-webapp)
+    - [Cloud-like infrastructure](#pres-cloud-infra)
+- [Running the Web application](#webapp-run)
+    - [Prerequisites](#webapp-run-prerequisites)
+    - [Installation](#webapp-run-installation)
+    - [Development](#webapp-run-development)
+    - [Testing](#webapp-run-testing)
+- [Deploying the infrastructure](#infra-deployment)
+    - [Prerequisites](#infra-deployment-prerequisites)
+    - [Starting Vagrant](#infra-deployment-vagrant)
+    - [Launching redis-server only](#infra-deployment-redis)
+    - [Deploying tchatter-app only](#infra-deployment-webapp)
+    - [Deploying whole infrastructure](#infra-deployment-all)
+- [Running the experiment scenario](#experiment-run)
+- [Our feedback](#feedback)
+
+<a name="presentation"/>
 ## Presentation
 
 This project is two things:
@@ -7,6 +26,7 @@ This project is two things:
 - a modern web application built with state-of-the-art tools and practices
 - a cloud-like infrastructure allowing updates without service interruption
 
+<a name="pres-webapp"/>
 ### Web application
 
 A simple chat application built with [Nodejs](http://nodejs.org/)/Express, [Angular](https://angularjs.org/), SockJS, Mocha, Chai, WebDriverJS, [Redis](http://redis.io/)...
@@ -15,7 +35,7 @@ Bootstrapped from [Yearofmoo's AngularJS Seed](https://github.com/yearofmoo/angu
 Everything has been coded with several tests first, at least one test by "layer" concerned (server, client) and one end-to-end test.
 This process was a bit dumb (some things were tested several times) on purpose, to force us in using all tools we wanted to discover (namely: Grunt, Karma and Protractor).
 
-
+<a name="pres-cloud-infra"/>
 ### Cloud-like infrastructure
 
 The goal is to allow deploying web application updates without service interruption (not yet fully achieved, see [Note](#note) below).
@@ -38,24 +58,29 @@ Indeed, we populated our chat with "Reservoir Dogs" characters who automatically
 
 We were in an extreme prototyping mood with direct feedback, therefore tests have clearly been left behind :)
 
+<a name="webapp-run"/>
 ## Running the Web application
 
-### Pre-requisite
+<a name="webapp-run-prerequisites"/>
+### Prerequisites
 
 Install NodeJS/Npm
 Install Redis or use the Redis container provided by the infrastructure part
 
+<a name="webapp-run-installation"/>
 ### Installation
 
 1. `npm install -g grunt-cli`
 2. `npm install`
 3. `grunt install`
 
+<a name="webapp-run-development"/>
 ### Development
 
 1. `grunt dev`
 2. Go to: `http://localhost:8080`
 
+<a name="webapp-run-testing"/>
 ### Testing
 
 #### Run all tests with
@@ -91,36 +116,43 @@ Install Redis or use the Redis container provided by the infrastructure part
 npm run package
 ```
 
+<a name="infra-deployment"/>
 ## Deploying the infrastructure
 
-### Pre-requisite
+<a name="infra-deployment-prerequisites"/>
+### Prerequisite
 
 Install:
 
 - Vagrant
 - Ansible
 
-### Vagrant installation
+<a name="infra-deployment-vagrant"/>
+### Starting Vagrant
 `vagrant up`
 
+<a name="infra-deployment-redis"/>
 ### Launching redis-server only (needs Vagrant running)
 ```
 cd infra
 ansible-playbook -i inventories/dev redis-server.yml
 ```
 
+<a name="infra-deployment-webapp"/>
 ### Deploying tchatter-app only (needs Vagrant running)
 ```
 cd infra
 ansible-playbook -i inventories/dev tchatter-app.yml
 ```
 
+<a name="infra-deployment-all"/>
 ### Deploying whole infrastructure (needs Vagrant running)
 ```
 npm run deploy
 ```
 
-## Run the experiment scenario
+<a name="experiment-run"/>
+## Running the experiment scenario
 
 1. Launch the production environment with
 ```
@@ -151,7 +183,8 @@ On service restart, there is a disconnection/reconnection for each browser clien
 - the client displays that inadequate information because the disconnection event comes from the server, not the client
 - all messages sent by other clients meanwhile are lost for the disconnected client. Upon reconnection, the client should ask for the missing messages.
 
-## Feedback
+<a name="feedback"/>
+## Our feedback
 
 **Angular**: Our web app is not complex enough to have a clear opinion. The double databinding is quite spectacular, but comes at a price: we lost control of the view part,
 which can be regained at an expensive cost (directives).
@@ -168,4 +201,4 @@ which can be regained at an expensive cost (directives).
 **Ansible**: rolling updates mechanism is not applicable to docker containers. Ansible allows to loop on hosts,
 but containers are not regular hosts (because of the previous point). Our solution [here](infra/tchatter-app-nodes.yml).
 
-**Redis**: messages seem lost if there is no consumer
+**Redis**: simple pub/sub channels implementation. That said, in our case, we would need some mechanism to ensure no messages are lost if there is no consumer.
